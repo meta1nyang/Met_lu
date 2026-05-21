@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Cleaning System</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  position:relative;
+  margin:0;
+  overflow:hidden;
+  height:100vh;
+
+  font-family:'Trebuchet MS','Arial Rounded MT Bold','Nunito',sans-serif;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:#8fd8ff;
+
+  touch-action:none;
+}
+
+body::before{
+  content:"";
+
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255,255,255,0.9), transparent 24%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.45), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(255,255,255,0.25), transparent 40%);
+
+  pointer-events:none;
+
+  z-index:99999;
+}
+
+.bg{
+  position:fixed;
+  inset:0;
+
+  background:
+    radial-gradient(circle at top,#e7ffff 0%,#90d8ff 40%,#4e95ff 100%);
+
+  filter:blur(12px);
+  transform:scale(1.08);
+}
+
+.overlay{
+  position:fixed;
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  backdrop-filter:blur(20px);
+
+  z-index:5000;
+}
+
+.panel{
+  width:340px;
+
+  padding:24px;
+
+  border-radius:28px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.45),
+      rgba(255,255,255,0.14)
+    );
+
+  border:1px solid rgba(255,255,255,0.55);
+
+  box-shadow:
+    0 0 50px rgba(180,240,255,0.35),
+    inset 0 1px 5px rgba(255,255,255,0.8);
+
+  color:rgba(255,255,255,0.96);
+
+  text-shadow:
+    0 1px 2px rgba(0,40,80,0.35),
+    0 0 10px rgba(255,255,255,0.35);
+}
+
+.title{
+  font-weight:700;
+  font-size:24px;
+  letter-spacing:2px;
+
+  margin-bottom:18px;
+
+  text-shadow:
+    0 0 16px rgba(255,255,255,0.8);
+}
+
+.langButtons{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+button{
+  font-weight:700;
+  border:none;
+
+  padding:14px;
+
+  border-radius:18px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.52),
+      rgba(255,255,255,0.18)
+    );
+
+  color:rgba(255,255,255,0.96);
+
+  text-shadow:
+    0 1px 2px rgba(0,40,80,0.35),
+    0 0 10px rgba(255,255,255,0.35);
+
+  font-size:16px;
+
+  box-shadow:
+    0 0 20px rgba(255,255,255,0.25);
+}
+
+.loadingBar{
+  width:100%;
+  height:18px;
+
+  overflow:hidden;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,0.15);
+
+  border:1px solid rgba(255,255,255,0.3);
+}
+
+#loadingFill{
+  width:0%;
+  height:100%;
+
+  background:
+    linear-gradient(90deg,#e7ffff,white,#bdf4ff);
+}
+
+#loadingText{
+  color:rgba(255,255,255,0.92);
+  margin-top:14px;
+
+  opacity:0.85;
+
+  min-height:20px;
+}
+
+#startButton{
+  width:100%;
+
+  margin-top:18px;
+
+  display:none;
+}
+
+.window{
+  position:relative;
+
+  width:min(92vw,600px);
+
+  padding:22px;
+
+  border-radius:30px;
+
+  overflow:hidden;
+
+  color:rgba(255,255,255,0.96);
+
+  text-shadow:
+    0 1px 2px rgba(0,40,80,0.35),
+    0 0 10px rgba(255,255,255,0.35);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.42),
+      rgba(255,255,255,0.12)
+    );
+
+  border:1px solid rgba(255,255,255,0.5);
+
+  backdrop-filter:blur(24px);
+
+  box-shadow:
+    0 0 60px rgba(180,240,255,0.35),
+    inset 0 1px 5px rgba(255,255,255,0.8),
+    inset 0 -10px 24px rgba(0,120,255,0.12);
+}
+
+.window::before{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,0.34),
+      transparent 30%,
+      transparent 70%,
+      rgba(255,255,255,0.12)
+    );
+
+  pointer-events:none;
+}
+
+.topbar{
+  display:flex;
+  gap:8px;
+
+  padding-bottom:12px;
+
+  border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.dot{
+  width:14px;
+  height:14px;
+
+  border-radius:50%;
+
+  background:
+    radial-gradient(circle at 30% 30%, white,#9fe7ff);
+
+  box-shadow:0 0 10px rgba(255,255,255,0.7);
+}
+
+h1{
+  font-weight:700;
+  margin:18px 0 0;
+
+  font-size:30px;
+
+  letter-spacing:2px;
+
+  text-shadow:
+    0 0 12px rgba(255,255,255,0.9),
+    0 0 24px rgba(180,240,255,0.5);
+}
+
+.desc{
+  color:rgba(255,255,255,0.88);
+  margin-top:8px;
+
+  opacity:0.85;
+}
+
+#cleanArea{
+  position:relative;
+
+  width:100%;
+  height:340px;
+
+  margin-top:20px;
+
+  overflow:hidden;
+
+  border-radius:24px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.35),
+      rgba(120,200,255,0.08)
+    );
+
+  border:1px solid rgba(255,255,255,0.4);
+
+  box-shadow:
+    inset 0 0 30px rgba(255,255,255,0.12),
+    0 0 30px rgba(170,240,255,0.15);
+}
+
+#message{
+  color:rgba(255,255,255,0.22);
+  position:absolute;
+  inset:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:28px;
+
+  opacity:0.12;
+
+  letter-spacing:5px;
+
+  pointer-events:none;
+}
+
+.dirt{
+  position:absolute;
+
+  width:90px;
+  height:90px;
+
+  border-radius:40% 60% 55% 45%;
+
+  background:
+    radial-gradient(
+      rgba(40,40,40,0.45),
+      rgba(20,20,20,0.22) 70%,
+      transparent
+    );
+
+  filter:blur(7px);
+
+  transition:opacity 0.12s, transform 0.12s;
+}
+
+.cleanEffect{
+  position:absolute;
+
+  width:82px;
+  height:82px;
+
+  border-radius:50%;
+
+  pointer-events:none;
+
+  background:
+    radial-gradient(
+      rgba(255,255,255,0.28),
+      rgba(255,255,255,0.08) 45%,
+      transparent 75%
+    );
+
+  mix-blend-mode:screen;
+
+  opacity:0.72;
+
+  animation:fade 0.4s linear forwards;
+
+  will-change:transform, opacity;
+}
+
+@keyframes fade{
+  from{
+    opacity:1;
+    transform:scale(0.7);
+  }
+
+  to{
+    opacity:0;
+    transform:scale(1.4);
+  }
+}
+
+.progressBox{
+  margin-top:18px;
+}
+
+.progressText{
+  font-weight:600;
+  margin-bottom:8px;
+
+  opacity:0.8;
+}
+
+.progressBar{
+  width:100%;
+  height:16px;
+
+  overflow:hidden;
+
+  border-radius:999px;
+
+  background:rgba(255,255,255,0.14);
+
+  border:1px solid rgba(255,255,255,0.24);
+}
+
+#progressFill{
+  width:0%;
+  height:100%;
+
+  background:
+    linear-gradient(90deg,#dfffff,#ffffff,#b8f2ff);
+
+  box-shadow:0 0 20px rgba(255,255,255,0.8);
+
+  transition:width 0.25s ease-out;
+}
+
+#assistantBubble{
+  position:fixed;
+  top:28px;
+  left:-340px;
+
+  width:260px;
+
+  padding:14px;
+
+  border-radius:24px;
+
+  color:rgba(255,255,255,0.96);
+
+  text-shadow:
+    0 1px 2px rgba(0,40,80,0.35),
+    0 0 10px rgba(255,255,255,0.35);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.4),
+      rgba(255,255,255,0.14)
+    );
+
+  border:1px solid rgba(255,255,255,0.5);
+
+  backdrop-filter:blur(20px);
+
+  box-shadow:
+    0 0 30px rgba(180,240,255,0.3),
+    inset 0 1px 5px rgba(255,255,255,0.7);
+
+  opacity:0;
+
+  pointer-events:none;
+
+  z-index:999999;
+
+  will-change:transform, opacity;
+}
+
+.assistantHeader{
+  font-size:12px;
+
+  letter-spacing:2px;
+
+  opacity:0.7;
+
+  margin-bottom:8px;
+}
+
+.assistantText{
+  font-weight:600;
+  color:rgba(255,255,255,0.96);
+  line-height:1.5;
+}
+
+@keyframes bubbleMove{
+  0%{
+    transform:translateX(0);
+    opacity:0;
+  }
+
+  10%{
+    transform:translateX(360px);
+    opacity:1;
+  }
+
+  75%{
+    transform:translateX(360px);
+    opacity:1;
+  }
+
+  100%{
+    transform:translateX(780px);
+    opacity:0;
+  }
+}
+
+.popup{
+  position:absolute;
+  top:20px;
+  right:20px;
+
+  padding:14px 18px;
+
+  border-radius:20px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.4),
+      rgba(255,255,255,0.16)
+    );
+
+  border:1px solid rgba(255,255,255,0.5);
+
+  animation:popupShow 0.4s ease;
+}
+
+@keyframes popupShow{
+  from{
+    opacity:0;
+    transform:translateY(-20px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div id="languageScreen" class="overlay">
+  <div class="panel">
+    <div class="title">SELECT LANGUAGE</div>
+
+    <div class="langButtons">
+      <button class="langBtn" data-lang="en">English</button>
+      <button class="langBtn" data-lang="kr">한국어</button>
+      <button class="langBtn" data-lang="jp">日本語</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadingScreen" class="overlay" style="display:none;">
+  <div class="panel">
+    <div class="title">SYSTEM INITIALIZING</div>
+
+    <div class="loadingBar">
+      <div id="loadingFill"></div>
+    </div>
+
+    <div id="loadingText"></div>
+
+    <div id="specBox" style="margin-top:18px; opacity:0.82; font-size:13px; line-height:1.6;"></div>
+
+    <button id="startButton">START WORK</button>
+  </div>
+</div>
+
+<div id="assistantBubble">
+  <div class="assistantHeader">SYSTEM TASK MANAGER</div>
+  <div class="assistantText" id="assistantText"></div>
+</div>
+
+<div class="window" style="visibility:hidden;">
+
+  <div class="topbar">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <h1>CLEANING SYSTEM</h1>
+  <div class="desc" id="subtitle">쓱싹쓱싹 청소 중...</div>
+
+  <div id="cleanArea">
+    <div id="message">PLEASE CLEAN</div>
+  </div>
+
+  <div class="progressBox">
+    <div class="progressText">Cleaning Progress</div>
+
+    <div class="progressBar">
+      <div id="progressFill"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const translations = {
+  en:{
+    subtitle:'Wiping surfaces...',
+    specs:`💿 Recommended Device<br>
+    iPhone 11 / Galaxy S21 or higher<br>
+    High particle environment enabled<br>
+    Frame drops may occur on low-end devices.`,
+    loading:[
+      'Loading environmental assets...',
+      'Polishing atmosphere layers...',
+      'Removing microscopic dust...',
+      'Hydrating glass reflections...',
+      'Preparing comfort environment...',
+      'Stabilizing emotional support systems...',,
+      'Restoring glass reflections...',
+      'Preparing contamination system...',
+      'Synchronizing audio systems...'
+    ],
+    ready:'System ready.',
+    start:'START WORK',
+    intro:'Surface contamination detected.<br>Try not to miss any spots, okay?',
+    complete:'✨ TASK COMPLETE<br>Not bad. You actually finished it.',
+    next:'Previous cleaning process complete.<br>TASK {n} READY.',
+    working:[
+      'Oh. You\'re actually working.',
+      'Keep going. Don’t stop now.',
+      'The glass is recovering nicely.',
+      'Your wiping efficiency improved... somehow.',
+      'That area looks cleaner already.'
+    ],
+    idle:[
+      'You stopped already?',
+      'The contamination won’t clean itself.',
+      'Try moving your hands instead of staring.',
+      'Wow. Peak productivity right there.',
+      'Please resume cleaning. Eventually.'
+    ],
+    random:[
+      'You missed a spot. Obviously.',
+      'The glass looks better now... I guess.',
+      'Keep wiping. Don’t get lazy already.',
+      'Wow. Functional hands. Impressive.',
+      'Good enough... probably.'
+    ]
+  },
+
+  kr:{
+    subtitle:'쓱싹쓱싹 청소 중...',
+    specs:`💿 권장 사양<br>
+    iPhone 11 / Galaxy S21 이상 권장<br>
+    고급 유리 효과 활성화됨<br>
+    일부 기기에서 프레임 저하 가능`,
+    loading:[
+      '환경 데이터를 불러오는 중...',
+      '대기 레이어 광택 처리 중...',
+      '미세 먼지 제거 중...',
+      '유리 반사 수분감 조정 중...',
+      '편안한 환경 준비 중...',
+      '감성 안정 시스템 동기화 중...',,
+      '유리 반사 효과 복원 중...',
+      '오염 시스템 준비 중...',
+      '오디오 시스템 동기화 중...'
+    ],
+    ready:'시스템 준비 완료.',
+    start:'START WORK',
+    intro:'표면 오염이 감지되었습니다.<br>이번엔 좀 제대로 닦아봐요.',
+    complete:'✨ TASK COMPLETE<br>오… 생각보다 제대로 했네요.',
+    next:'이전 청소 작업 완료.<br>TASK {n} READY.',
+    working:[
+      '오. 제대로 하고 있긴 하네요.',
+      '계속해요. 거의 반짝거리잖아.',
+      '유리가 살아나는 느낌인데요?',
+      '손이 드디어 일하기 시작했네.',
+      '그 부분 꽤 깨끗해졌어요.'
+    ],
+    idle:[
+      '손 멈춘 거 다 보이거든요?',
+      '유리가 스스로 닦이진 않아요.',
+      '멍때리기 시스템은 없는데요.',
+      '와… 엄청난 생산성이네요.',
+      '계속 안 닦을 건 아니죠?' 
+    ],
+    random:[
+      '거기 안 닦였거든요?',
+      '유리가 좀 괜찮아졌네요.',
+      '손 멈춘 줄 알았어요.',
+      '오. 드디어 반짝거리네.',
+      '생각보다 성실하네… 흠.'
+    ]
+  },
+
+  jp:{
+    subtitle:'ふきふき清掃中...',
+    specs:`💿 推奨環境<br>
+    iPhone 11 / Galaxy S21 以上推奨<br>
+    高品質ガラスエフェクト有効
+    <br>一部端末ではフレーム低下の可能性があります。`,
+    loading:[
+      '環境データを読み込み中...',
+      '空気レイヤーを研磨中...',
+      '微細なホコリを除去中...',
+      'ガラス反射を保湿中...',
+      '快適環境を準備中...',
+      '感情安定システム同期中...',,
+      'ガラス反射を復元中...',
+      '汚染システム準備中...',
+      'オーディオ同期中...'
+    ],
+    ready:'システム準備完了。',
+    start:'START WORK',
+    intro:'表面汚染を検出しました。<br>ちゃんと掃除してくださいね。',
+    complete:'✨ TASK COMPLETE<br>へぇ…意外とちゃんとできるんだ。',
+    next:'前の清掃タスク完了。<br>TASK {n} READY.',
+    working:[
+      'ちゃんと掃除してますね。',
+      'その調子です。止まらないで。',
+      'ガラスが綺麗になってきました。',
+      '意外と手際いいじゃないですか。',
+      'その部分、かなり良くなりました。'
+    ],
+    idle:[
+      '手、止まってますけど？',
+      'ガラスは自分で綺麗になりません。',
+      'ぼーっとする時間じゃないですよ。',
+      'すごい生産性ですね…。',
+      '掃除、再開してください。'
+    ],
+    random:[
+      'そこ、まだ汚れてますけど？',
+      'ガラスが少し綺麗になりましたね。',
+      '手を止めないでください。',
+      '…まあ、悪くないです。',
+      'ちゃんとやればできるじゃないですか。'
+    ]
+  }
+};
+
+let currentLang = 'kr';
+let cleaned = 0;
+let isCleaning = false;
+let lastCleaningTime = 0;
+let lastMessage = '';
+let bubbleBusy = false;
+let currentTask = 1;
+
+const TOTAL_DIRT = 45;
+const CLEAN_REQUIRED = 45;
+
+const cleanArea = document.getElementById('cleanArea');
+const progressFill = document.getElementById('progressFill');
+const assistantBubble = document.getElementById('assistantBubble');
+const assistantText = document.getElementById('assistantText');
+const loadingScreen = document.getElementById('loadingScreen');
+const loadingFill = document.getElementById('loadingFill');
+const loadingText = document.getElementById('loadingText');
+const startButton = document.getElementById('startButton');
+const subtitle = document.getElementById('subtitle');
+const specBox = document.getElementById('specBox');
+
+const bgm = new Audio('https://met-lu.vercel.app/OMORI%20OST%20-%20006%20Let%27s%20Get%20Together%20Now!%20-%20OMOCAT.mp3');
+const pling = new Audio('https://met-lu.vercel.app/Pling%20Sound.mp3');
+
+bgm.loop = true;
+bgm.volume = 0.45;
+bgm.playsInline = true;
+
+pling.volume = 0.5;
+
+const dirtList = [];
+
+function randomRange(max){
+  return Math.random() * max;
+}
+
+function createDirt(){
+
+  for(let i=0;i<TOTAL_DIRT;i++){
+
+    const dirt = document.createElement('div');
+
+    dirt.className = 'dirt';
+
+    dirt.dataset.cleaned = 'no';
+    dirt.dataset.power = '0';
+
+    dirt.style.left = randomRange(90) + '%';
+    dirt.style.top = randomRange(85) + '%';
+
+    cleanArea.appendChild(dirt);
+
+    dirtList.push(dirt);
+  }
+}
+
+createDirt();
+
+let lastEffectTime = 0;
+
+function createEffect(x,y){
+
+  const now = performance.now();
+
+  if(now - lastEffectTime < 14) return;
+
+  lastEffectTime = now;
+
+  const effect = document.createElement('div');
+  effect.className = 'cleanEffect';
+
+  effect.style.left = (x - 36) + 'px';
+  effect.style.top = (y - 36) + 'px';
+
+  cleanArea.appendChild(effect);
+
+  setTimeout(()=>{
+    effect.remove();
+  },350);
+}
+
+function cleanAt(x,y){
+
+  isCleaning = true;
+  lastCleaningTime = Date.now();
+
+  const rect = cleanArea.getBoundingClientRect();
+
+  const localX = x - rect.left;
+  const localY = y - rect.top;
+
+  dirtList.forEach((dirt)=>{
+
+    if(dirt.dataset.cleaned === 'yes') return;
+
+    const dirtRect = dirt.getBoundingClientRect();
+
+    const dx = dirtRect.left - rect.left + dirtRect.width/2;
+    const dy = dirtRect.top - rect.top + dirtRect.height/2;
+
+    const distance = Math.hypot(localX - dx, localY - dy);
+
+    if(distance < 70){
+
+      let power = Number(dirt.dataset.power);
+
+      power += 0.45;
+
+      dirt.dataset.power = power;
+
+      const remain = 1 - (power / CLEAN_REQUIRED);
+
+      dirt.style.opacity = Math.max(remain,0);
+      dirt.style.transform = `scale(${1 + power*0.01})`;
+
+      createEffect(localX, localY);
+
+      if(power >= CLEAN_REQUIRED){
+
+        dirt.dataset.cleaned = 'yes';
+
+        dirt.style.opacity = '0';
+
+        cleaned++;
+
+        progressFill.style.width = (cleaned/TOTAL_DIRT)*100 + '%';
+
+        if(cleaned >= TOTAL_DIRT){
+          completeTask();
+        }
+      }
+    }
+  });
+}
+
+cleanArea.addEventListener('touchmove',(e)=>{
+
+  e.preventDefault();
+
+  const touch = e.touches[0];
+
+  cleanAt(touch.clientX, touch.clientY);
+
+},{ passive:false });
+
+function showMessage(text){
+
+  if(bubbleBusy) return;
+
+  bubbleBusy = true;
+
+  assistantText.innerHTML = text;
+
+  assistantBubble.style.animation = 'none';
+  void assistantBubble.offsetWidth;
+
+  assistantBubble.style.animation = 'bubbleMove 6s ease forwards';
+
+  pling.currentTime = 0;
+  pling.play().catch(()=>{});
+
+  setTimeout(()=>{
+    bubbleBusy = false;
+  },6000);
+}
+
+function randomManagerMessage(){
+
+  const data = translations[currentLang];
+
+  const idleTooLong = Date.now() - lastCleaningTime > 5000;
+
+  let list = data.random;
+
+  if(idleTooLong){
+    list = data.idle;
+  }
+  else if(isCleaning){
+    list = data.working;
+  }
+
+  let message = list[Math.floor(Math.random()*list.length)];
+
+  while(message === lastMessage && list.length > 1){
+    message = list[Math.floor(Math.random()*list.length)];
+  }
+
+  lastMessage = message;
+
+  return message;
+}
+
+setInterval(()=>{
+
+  if(loadingScreen.style.display !== 'none') return;
+
+  if(cleaned >= TOTAL_DIRT) return;
+
+  showMessage(randomManagerMessage());
+
+},9000);
+
+function completeTask(){
+
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+
+  popup.innerHTML = translations[currentLang].complete;
+
+  document.querySelector('.window').appendChild(popup);
+
+  setTimeout(()=>{
+
+    popup.remove();
+
+    currentTask++;
+
+    showMessage(
+      translations[currentLang].next.replace('{n}', currentTask)
+    );
+
+    cleaned = 0;
+
+    progressFill.style.width = '0%';
+
+    dirtList.forEach((dirt)=>{
+
+      dirt.dataset.cleaned = 'no';
+      dirt.dataset.power = '0';
+
+      dirt.style.opacity = '1';
+      dirt.style.transform = 'scale(1)';
+
+      dirt.style.left = randomRange(90) + '%';
+      dirt.style.top = randomRange(85) + '%';
+    });
+
+  },2200);
+}
+
+function startLoading(){
+
+  subtitle.innerHTML = translations[currentLang].subtitle;
+
+  specBox.innerHTML = translations[currentLang].specs;
+
+  let progress = 0;
+
+  const interval = setInterval(()=>{
+
+    progress += 17;
+
+    if(progress > 100){
+      progress = 100;
+    }
+
+    loadingFill.style.width = progress + '%';
+
+    const loadingList = translations[currentLang].loading;
+
+    loadingText.innerHTML = loadingList[
+      Math.floor(Math.random()*loadingList.length)
+    ];
+
+    if(progress >= 100){
+
+      progress = 100;
+
+      clearInterval(interval);
+
+      loadingText.innerHTML = translations[currentLang].ready;
+
+      startButton.innerHTML = translations[currentLang].start;
+
+      startButton.style.display = 'block';
+    }
+
+  },520);
+}
+
+async function startGame(){
+
+  document.querySelector('.window').style.visibility = 'visible';
+
+  try{
+    await bgm.play();
+  }
+  catch(err){
+    console.log(err);
+  }
+
+  loadingScreen.style.display = 'none';
+
+  loadingScreen.style.transition = '0.7s';
+  loadingScreen.style.opacity = '0';
+
+  setTimeout(()=>{
+    loadingScreen.remove();
+  },700);
+
+  showMessage(translations[currentLang].intro);
+}
+
+startButton.addEventListener('click', startGame);
+
+document.querySelectorAll('.langBtn').forEach((button)=>{
+
+  button.addEventListener('click',()=>{
+
+    currentLang = button.dataset.lang;
+
+    const languageScreen = document.getElementById('languageScreen');
+
+    languageScreen.style.transition = '0.5s';
+    languageScreen.style.opacity = '0';
+
+    setTimeout(()=>{
+      languageScreen.remove();
+      loadingScreen.style.display = 'flex';
+      document.querySelector('.window').style.visibility = 'hidden';
+      startLoading();
+    },500);
+  });
+});
+</script>
+
+</body>
+</html>
