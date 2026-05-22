@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOR YOU - artful</title>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+background:
+radial-gradient(circle at 20% 20%, rgba(255,255,255,.08), transparent 30%),
+radial-gradient(circle at 80% 70%, rgba(255,255,255,.05), transparent 35%),
+linear-gradient(#0a0a0a,#000);
+font-family:"Nunito","Poppins",sans-serif;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+transition:background .6s ease;
+}
+
+body.heart-mode{
+background:
+radial-gradient(circle at 50% 50%, rgba(255,190,220,.35), transparent 45%),
+linear-gradient(#1a0d14,#000);
+}
+
+.header{
+position:fixed;
+top:42px;
+text-align:center;
+z-index:5;
+}
+
+.header h1{
+margin:0;
+font-size:42px;
+letter-spacing:4px;
+animation:titleFloat 4s ease-in-out infinite;
+}
+
+.header p{
+margin-top:6px;
+font-size:14px;
+opacity:.75;
+animation:subFloat 3s ease-in-out infinite;
+}
+
+.player{
+position:relative;
+width:320px;
+max-width:88vw;
+padding:18px;
+border-radius:18px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(10px);
+box-shadow:0 0 25px rgba(255,255,255,.08);
+transform:translateY(-65px);
+z-index:5;
+animation:uiPop .9s cubic-bezier(.2,.9,.2,1);
+}
+
+#trackName{
+font-size:13px;
+opacity:.75;
+margin-bottom:12px;
+text-align:center;
+}
+
+.progress-bar{
+width:100%;
+height:10px;
+border-radius:999px;
+background:#222;
+overflow:hidden;
+cursor:pointer;
+}
+
+.progress{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#fff,#777);
+border-radius:999px;
+}
+
+.time{
+display:flex;
+justify-content:space-between;
+margin-top:5px;
+font-size:11px;
+opacity:.65;
+}
+
+.controls{
+display:flex;
+justify-content:center;
+gap:10px;
+margin-top:14px;
+flex-wrap:wrap;
+}
+
+button{
+border:none;
+background:#1c1c1c;
+color:white;
+padding:10px 14px;
+border-radius:12px;
+cursor:pointer;
+font-size:15px;
+transition:.2s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+/* 루프 상태 */
+
+.loop-one{
+background:white !important;
+color:black !important;
+box-shadow:0 0 14px rgba(255,255,255,.4);
+}
+
+.loop-all{
+background:#ffd6f1 !important;
+color:black !important;
+box-shadow:0 0 16px rgba(255,180,220,.8);
+}
+
+.character{
+position:fixed;
+bottom:-30px;
+left:50%;
+transform:translateX(-50%);
+width:340px;
+height:340px;
+z-index:20;
+cursor:pointer;
+transform-origin:center bottom;
+transition:transform .12s cubic-bezier(.2,.9,.2,1);
+}
+
+.character:active{
+transform:
+translateX(-50%)
+scaleY(.92)
+scaleX(1.02)
+translateY(8px);
+}
+
+.layer{
+position:absolute;
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+.body{
+animation:float 5s ease-in-out infinite;
+}
+
+.arm-front,
+.arm-back{
+animation:arm 3s ease-in-out infinite;
+}
+
+.heart{
+position:fixed;
+left:50%;
+bottom:180px;
+transform:translateX(-50%);
+font-size:70px;
+opacity:1;
+pointer-events:none;
+z-index:999999;
+animation:heartFloat 3s ease-out forwards;
+filter:
+drop-shadow(0 0 14px rgba(255,255,255,.95))
+drop-shadow(0 0 24px rgba(255,255,255,.6));
+}
+
+.sparkle{
+position:fixed;
+right:-20px;
+font-size:16px;
+opacity:0;
+pointer-events:none;
+animation:sparkMove 1.8s linear forwards;
+z-index:999;
+}
+
+.flash{
+position:fixed;
+inset:0;
+background:white;
+opacity:0;
+pointer-events:none;
+animation:flash .35s ease-out;
+z-index:9998;
+}
+
+@keyframes uiPop{
+0%{
+opacity:0;
+transform:translateY(-30px) scale(.92);
+}
+100%{
+opacity:1;
+transform:translateY(-65px) scale(1);
+}
+}
+
+@keyframes titleFloat{
+0%,100%{
+transform:translateY(0);
+}
+50%{
+transform:translateY(-8px);
+}
+}
+
+@keyframes subFloat{
+0%,100%{
+transform:translateY(0);
+opacity:.7;
+}
+50%{
+transform:translateY(-5px);
+opacity:1;
+}
+}
+
+@keyframes float{
+0%,100%{
+transform:translateY(0);
+}
+50%{
+transform:translateY(-6px);
+}
+}
+
+@keyframes arm{
+0%,100%{
+transform:rotate(0deg);
+}
+50%{
+transform:rotate(3deg);
+}
+}
+
+@keyframes flash{
+0%{opacity:0;}
+25%{opacity:.14;}
+100%{opacity:0;}
+}
+
+@keyframes sparkMove{
+0%{
+transform:translateX(0);
+opacity:0;
+}
+15%{
+opacity:1;
+}
+100%{
+transform:translateX(-120vw);
+opacity:0;
+}
+}
+
+@keyframes heartFloat{
+0%{
+opacity:0;
+transform:
+translate(-50%,40px)
+scale(.4);
+}
+20%{
+opacity:1;
+}
+100%{
+opacity:0;
+transform:
+translate(-50%,-220px)
+scale(1.2);
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>FOR YOU</h1>
+<p>- artful</p>
+</div>
+
+<div class="player" id="player">
+
+<div id="trackName">track 1</div>
+
+<audio id="audio"></audio>
+
+<div class="progress-bar" id="bar">
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="time">
+<span id="current">0:00</span>
+<span id="duration">0:00</span>
+</div>
+
+<div class="controls">
+
+<button onclick="prev()">⏮</button>
+
+<button onclick="toggle()">▶</button>
+
+<button onclick="next()">⏭</button>
+
+<button id="loopBtn" onclick="toggleLoop()">
+🔁
+</button>
+
+</div>
+
+</div>
+
+<div class="character" id="char">
+
+<img class="layer arm-back"
+src="https://i.ibb.co/4cG0Q3z/259-20260522204533.png">
+
+<img class="layer body"
+src="https://i.ibb.co/S74SMmcY/259-20260522204530.png">
+
+<img class="layer arm-front"
+src="https://i.ibb.co/hFjcHnPL/259-20260522204527.png">
+
+</div>
+
+<script>
+
+const tracks = [
+
+"https://met-lu.vercel.app/Cookieware%3B0.mp3",
+
+"https://met-lu.vercel.app/I_%E2%99%A1_U_!!!.mp3",
+
+"https://met-lu.vercel.app/Tixapalooza%20of%20Riches%20-%20Die%20Of%20Death%20%5BOST%5D%20-%20Arthur%20Lima%20Stuff.mp3",
+
+"https://met-lu.vercel.app/Die%20of%20Death%20OST%20-%20Est-ce%20ta%20carte%20(Artful's%20Theme)%20-%20theonlywhitesofa.mp3",
+
+"https://met-lu.vercel.app/Devesto%20Chase%20Theme%20%5BDie%20Of%20Death%20OST%5D%20-%20Yuri.mp3"
+
+];
+
+let i = 0;
+
+/*
+0 = 꺼짐
+1 = 한곡 반복
+2 = 전체 반복
+*/
+
+let loopMode = 0;
+
+const audio = document.getElementById("audio");
+const progress = document.getElementById("progress");
+const bar = document.getElementById("bar");
+const current = document.getElementById("current");
+const duration = document.getElementById("duration");
+const trackName = document.getElementById("trackName");
+const char = document.getElementById("char");
+const player = document.getElementById("player");
+const loopBtn = document.getElementById("loopBtn");
+
+function isLastTrack(){
+return i === tracks.length - 1;
+}
+
+function loadTrack(index){
+
+audio.src = tracks[index];
+
+trackName.textContent =
+`track ${index + 1}`;
+
+}
+
+loadTrack(i);
+
+/* 🔁 루프 */
+
+function toggleLoop(){
+
+loopMode++;
+
+if(loopMode > 2){
+loopMode = 0;
+}
+
+loopBtn.classList.remove(
+"loop-one",
+"loop-all"
+);
+
+if(loopMode === 1){
+
+loopBtn.classList.add("loop-one");
+loopBtn.textContent = "🔂";
+
+}else if(loopMode === 2){
+
+loopBtn.classList.add("loop-all");
+loopBtn.textContent = "🔁";
+
+}else{
+
+loopBtn.textContent = "🔁";
+
+}
+
+}
+
+/* 재생 */
+
+function toggle(){
+
+if(audio.paused){
+
+audio.play();
+
+}else{
+
+audio.pause();
+
+}
+
+}
+
+function next(){
+
+i++;
+
+if(i >= tracks.length){
+
+i = 0;
+
+}
+
+loadTrack(i);
+
+audio.play();
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+}
+
+function prev(){
+
+i--;
+
+if(i < 0){
+
+i = tracks.length - 1;
+
+}
+
+loadTrack(i);
+
+audio.play();
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+}
+
+function formatTime(sec){
+
+const m = Math.floor(sec / 60);
+
+const s = Math.floor(sec % 60)
+.toString()
+.padStart(2,"0");
+
+return `${m}:${s}`;
+
+}
+
+audio.addEventListener("timeupdate", ()=>{
+
+if(!audio.duration) return;
+
+const percent =
+(audio.currentTime / audio.duration) * 100;
+
+progress.style.width =
+percent + "%";
+
+current.textContent =
+formatTime(audio.currentTime);
+
+duration.textContent =
+formatTime(audio.duration);
+
+});
+
+/* 드래그 */
+
+let dragging = false;
+
+function seek(e){
+
+const rect =
+bar.getBoundingClientRect();
+
+const x =
+(e.clientX - rect.left) / rect.width;
+
+audio.currentTime =
+Math.max(0, Math.min(1,x))
+* audio.duration;
+
+}
+
+bar.addEventListener("mousedown",(e)=>{
+dragging = true;
+seek(e);
+});
+
+window.addEventListener("mousemove",(e)=>{
+if(dragging) seek(e);
+});
+
+window.addEventListener("mouseup",()=>{
+dragging = false;
+});
+
+bar.addEventListener("touchstart",(e)=>{
+dragging = true;
+seek(e.touches[0]);
+});
+
+window.addEventListener("touchmove",(e)=>{
+if(dragging) seek(e.touches[0]);
+});
+
+window.addEventListener("touchend",()=>{
+dragging = false;
+});
+
+/* 반짝이 */
+
+function sparkle(){
+
+const s =
+document.createElement("div");
+
+s.className = "sparkle";
+
+s.textContent = "☆";
+
+s.style.top =
+Math.random() * 80 + "%";
+
+document.body.appendChild(s);
+
+setTimeout(()=>{
+s.remove();
+},1800);
+
+}
+
+/* 플래시 */
+
+function flash(){
+
+const f =
+document.createElement("div");
+
+f.className = "flash";
+
+document.body.appendChild(f);
+
+setTimeout(()=>{
+f.remove();
+},350);
+
+}
+
+/* 🤍 하트 */
+
+let lastHeartTime = 0;
+
+function spawnHeart(){
+
+const now = Date.now();
+
+if(now - lastHeartTime < 5000){
+return;
+}
+
+lastHeartTime = now;
+
+document.body.classList.add("heart-mode");
+
+setTimeout(()=>{
+document.body.classList.remove("heart-mode");
+},900);
+
+const h =
+document.createElement("div");
+
+h.className = "heart";
+
+h.textContent = "🤍";
+
+document.body.appendChild(h);
+
+setTimeout(()=>{
+h.remove();
+},3000);
+
+}
+
+/* 캐릭터 클릭 */
+
+char.addEventListener("click",()=>{
+
+flash();
+
+for(let k=0;k<3;k++){
+
+setTimeout(()=>{
+sparkle();
+},k*120);
+
+}
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+});
+
+/* 플레이어 클릭 */
+
+player.addEventListener("click",()=>{
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+});
+
+/* 곡 종료 */
+
+audio.addEventListener("ended",()=>{
+
+/* 🔂 한곡 반복 */
+
+if(loopMode === 1){
+
+audio.currentTime = 0;
+audio.play();
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+return;
+
+}
+
+/* 🔁 전체 반복 */
+
+if(loopMode === 2){
+
+if(isLastTrack()){
+
+i = 0;
+
+}else{
+
+i++;
+
+}
+
+loadTrack(i);
+
+audio.play();
+
+if(isLastTrack()){
+spawnHeart();
+}
+
+return;
+
+}
+
+/* 일반 재생 */
+
+if(isLastTrack()){
+
+spawnHeart();
+
+flash();
+
+audio.pause();
+
+}else{
+
+next();
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
