@@ -2,10 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>FOR YOU - artful</title>
 
 <style>
+
+*{
+-webkit-tap-highlight-color: transparent;
+-webkit-touch-callout: none;
+user-select:none;
+}
 
 body{
 margin:0;
@@ -21,6 +27,7 @@ justify-content:center;
 align-items:center;
 min-height:100vh;
 transition:background .6s ease;
+touch-action:manipulation;
 }
 
 body.heart-mode{
@@ -29,11 +36,39 @@ radial-gradient(circle at 50% 50%, rgba(255,190,220,.35), transparent 45%),
 linear-gradient(#1a0d14,#000);
 }
 
+/* 모바일 경고 */
+
+.pc-warning{
+position:fixed;
+inset:0;
+background:black;
+display:none;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:30px;
+z-index:9999999;
+font-size:20px;
+line-height:1.8;
+backdrop-filter:blur(8px);
+}
+
+@media (min-width: 900px){
+
+.pc-warning{
+display:flex;
+}
+
+}
+
+/* 제목 */
+
 .header{
 position:fixed;
 top:42px;
 text-align:center;
 z-index:5;
+pointer-events:none;
 }
 
 .header h1{
@@ -49,6 +84,8 @@ font-size:14px;
 opacity:.75;
 animation:subFloat 3s ease-in-out infinite;
 }
+
+/* 플레이어 */
 
 .player{
 position:relative;
@@ -118,6 +155,10 @@ button:hover{
 transform:translateY(-2px);
 }
 
+button:active{
+transform:scale(.96);
+}
+
 /* 루프 상태 */
 
 .loop-one{
@@ -132,25 +173,28 @@ color:black !important;
 box-shadow:0 0 16px rgba(255,180,220,.8);
 }
 
+/* 캐릭터 */
+
 .character{
 position:fixed;
-bottom:-30px;
+bottom:-35px;
 left:50%;
 transform:translateX(-50%);
-width:340px;
-height:340px;
+width:320px;
+height:320px;
 z-index:20;
 cursor:pointer;
 transform-origin:center bottom;
 transition:transform .12s cubic-bezier(.2,.9,.2,1);
+pointer-events:auto;
 }
 
 .character:active{
 transform:
 translateX(-50%)
-scaleY(.92)
-scaleX(1.02)
-translateY(8px);
+scaleY(.94)
+scaleX(1.01)
+translateY(6px);
 }
 
 .layer{
@@ -158,6 +202,9 @@ position:absolute;
 width:100%;
 height:100%;
 object-fit:contain;
+pointer-events:none;
+-webkit-user-drag:none;
+user-drag:none;
 }
 
 .body{
@@ -168,6 +215,8 @@ animation:float 5s ease-in-out infinite;
 .arm-back{
 animation:arm 3s ease-in-out infinite;
 }
+
+/* 🤍 하트 */
 
 .heart{
 position:fixed;
@@ -184,6 +233,8 @@ drop-shadow(0 0 14px rgba(255,255,255,.95))
 drop-shadow(0 0 24px rgba(255,255,255,.6));
 }
 
+/* 반짝이 */
+
 .sparkle{
 position:fixed;
 right:-20px;
@@ -194,6 +245,8 @@ animation:sparkMove 1.8s linear forwards;
 z-index:999;
 }
 
+/* 플래시 */
+
 .flash{
 position:fixed;
 inset:0;
@@ -203,6 +256,8 @@ pointer-events:none;
 animation:flash .35s ease-out;
 z-index:9998;
 }
+
+/* 애니메이션 */
 
 @keyframes uiPop{
 0%{
@@ -255,7 +310,7 @@ transform:rotate(3deg);
 
 @keyframes flash{
 0%{opacity:0;}
-25%{opacity:.14;}
+25%{opacity:.10;}
 100%{opacity:0;}
 }
 
@@ -296,6 +351,16 @@ scale(1.2);
 
 <body>
 
+<!-- PC 경고 -->
+
+<div class="pc-warning">
+<div>
+📱<br><br>
+모바일 환경에서 열어주세요.<br>
+PC / 타블렛 환경은 지원하지 않음 😐
+</div>
+</div>
+
 <div class="header">
 <h1>FOR YOU</h1>
 <p>- artful</p>
@@ -325,7 +390,7 @@ scale(1.2);
 <button onclick="next()">⏭</button>
 
 <button id="loopBtn" onclick="toggleLoop()">
-🔁
+➡
 </button>
 
 </div>
@@ -335,13 +400,16 @@ scale(1.2);
 <div class="character" id="char">
 
 <img class="layer arm-back"
-src="https://i.ibb.co/4cG0Q3z/259-20260522204533.png">
+src="https://i.ibb.co/4cG0Q3z/259-20260522204533.png"
+draggable="false">
 
 <img class="layer body"
-src="https://i.ibb.co/S74SMmcY/259-20260522204530.png">
+src="https://i.ibb.co/S74SMmcY/259-20260522204530.png"
+draggable="false">
 
 <img class="layer arm-front"
-src="https://i.ibb.co/hFjcHnPL/259-20260522204527.png">
+src="https://i.ibb.co/hFjcHnPL/259-20260522204527.png"
+draggable="false">
 
 </div>
 
@@ -423,7 +491,7 @@ loopBtn.textContent = "🔁";
 
 }else{
 
-loopBtn.textContent = "🔁";
+loopBtn.textContent = "➡";
 
 }
 
@@ -450,9 +518,7 @@ function next(){
 i++;
 
 if(i >= tracks.length){
-
 i = 0;
-
 }
 
 loadTrack(i);
@@ -470,9 +536,7 @@ function prev(){
 i--;
 
 if(i < 0){
-
 i = tracks.length - 1;
-
 }
 
 loadTrack(i);
