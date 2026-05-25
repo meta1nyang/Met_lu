@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LOG_SYS</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+
+user-select:none;
+-webkit-user-select:none;
+
+outline:none;
+touch-action:none;
+
+-webkit-tap-highlight-color:transparent;
+}
+
+body{
+
+width:100%;
+height:100vh;
+
+overflow:hidden;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:
+radial-gradient(circle,
+#120013 0%,
+#000 70%);
+
+font-family:'VT323', monospace;
+}
+
+/* ===== MONITOR ===== */
+
+.monitor{
+
+width:min(99vw,195vh);
+
+aspect-ratio:16/9;
+
+position:relative;
+
+overflow:hidden;
+
+background:#b6e7ff;
+
+border:min(.9vw,10px)
+solid black;
+
+box-shadow:
+0 0 70px rgba(255,0,255,.18),
+0 0 120px rgba(0,140,255,.12),
+inset 0 0 50px rgba(255,255,255,.08);
+
+animation:
+screenMove 6s infinite linear;
+
+transition:
+filter 1s ease,
+background 1s ease;
+}
+
+/* ===== FINAL INSANE MODE ===== */
+
+.insane-mode{
+
+filter:
+contrast(1.35)
+saturate(2.2)
+hue-rotate(-25deg)
+brightness(.9);
+}
+
+.insane-mode .monitor{
+
+background:#ffc4ff;
+}
+
+/* ===== DARKNESS ===== */
+
+.darkness{
+
+position:absolute;
+inset:0;
+
+background:black;
+
+opacity:0;
+
+pointer-events:none;
+
+z-index:8000;
+
+transition:
+opacity 1.4s ease;
+}
+
+/* ===== RGB ===== */
+
+.chromatic{
+
+position:absolute;
+inset:0;
+
+pointer-events:none;
+
+z-index:300;
+
+mix-blend-mode:screen;
+}
+
+.rgb-red,
+.rgb-blue,
+.rgb-green{
+
+position:absolute;
+inset:0;
+}
+
+.rgb-red{
+
+background:
+rgba(255,0,90,.16);
+
+animation:
+rgbRed .03s infinite;
+}
+
+.rgb-blue{
+
+background:
+rgba(0,140,255,.16);
+
+animation:
+rgbBlue .05s infinite;
+}
+
+.rgb-green{
+
+background:
+rgba(0,255,120,.08);
+
+animation:
+rgbGreen .04s infinite;
+}
+
+@keyframes rgbRed{
+
+0%{
+transform:translateX(-1px);
+}
+
+50%{
+transform:translateX(-4px);
+}
+
+100%{
+transform:translateX(-1px);
+}
+
+}
+
+@keyframes rgbBlue{
+
+0%{
+transform:translateX(1px);
+}
+
+50%{
+transform:translateX(4px);
+}
+
+100%{
+transform:translateX(1px);
+}
+
+}
+
+@keyframes rgbGreen{
+
+0%{
+transform:translateY(1px);
+}
+
+50%{
+transform:translateY(-2px);
+}
+
+100%{
+transform:translateY(1px);
+}
+
+}
+
+/* ===== CRT ===== */
+
+.monitor::before{
+
+content:"";
+
+position:absolute;
+inset:0;
+
+background:
+repeating-linear-gradient(
+to bottom,
+rgba(0,0,0,.08),
+rgba(0,0,0,.08) 2px,
+transparent 2px,
+transparent 4px
+);
+
+pointer-events:none;
+
+z-index:200;
+}
+
+.monitor::after{
+
+content:"";
+
+position:absolute;
+inset:0;
+
+opacity:.13;
+
+background-image:
+radial-gradient(
+rgba(255,255,255,.18) 1px,
+transparent 1px
+);
+
+background-size:3px 3px;
+
+mix-blend-mode:overlay;
+
+pointer-events:none;
+
+animation:
+noise .14s infinite;
+
+z-index:201;
+}
+
+@keyframes noise{
+
+0%{
+transform:translate(0px,0px);
+}
+
+25%{
+transform:translate(-2px,1px);
+}
+
+50%{
+transform:translate(2px,-2px);
+}
+
+75%{
+transform:translate(-1px,1px);
+}
+
+100%{
+transform:translate(0px,0px);
+}
+
+}
+
+@keyframes screenMove{
+
+0%{
+transform:translateX(0px);
+}
+
+50%{
+transform:translateX(.6px);
+}
+
+100%{
+transform:translateX(0px);
+}
+
+}
+
+/* ===== TOP ===== */
+
+.systembar{
+
+width:100%;
+height:6.3%;
+
+background:black;
+
+border-bottom:3px solid #222;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:0 .8vw;
+
+color:#9ed8ff;
+
+font-size:
+clamp(14px,1.3vw,24px);
+
+position:relative;
+z-index:5;
+}
+
+.leftmenu{
+
+display:flex;
+gap:.6vw;
+}
+
+.menu-btn{
+
+padding:.1vw .5vw;
+}
+
+/* ===== DESKTOP ===== */
+
+.desktop{
+
+position:relative;
+
+width:100%;
+height:93.7%;
+
+overflow:hidden;
+
+z-index:5;
+}
+
+/* ===== ICON ===== */
+
+.icon{
+
+width:12%;
+min-width:75px;
+
+padding:1vw;
+margin:1vw;
+
+text-align:center;
+
+cursor:pointer;
+
+border:2px solid transparent;
+}
+
+.icon:hover{
+
+background:
+rgba(0,0,0,.1);
+
+border:2px solid black;
+}
+
+.icon.selected{
+
+background:
+rgba(0,0,0,.15);
+
+border:2px dashed black;
+}
+
+.icon-img{
+
+font-size:
+clamp(32px,4vw,66px);
+}
+
+.icon-text{
+
+margin-top:.2vw;
+
+font-size:
+clamp(14px,1.2vw,22px);
+
+text-shadow:
+-2px 0 rgba(255,0,90,.5),
+2px 0 rgba(0,140,255,.5);
+}
+
+/* ===== WINDOW ===== */
+
+.window{
+
+position:absolute;
+
+width:42%;
+height:60%;
+
+background:#d5f2ff;
+
+border:min(.4vw,5px)
+solid black;
+
+display:flex;
+flex-direction:column;
+
+overflow:hidden;
+
+box-shadow:
+1vw 1vw 0 rgba(0,0,0,.18);
+
+animation:
+openWindow .12s ease;
+}
+
+@keyframes openWindow{
+
+from{
+
+transform:
+scale(.85);
+
+opacity:0;
+}
+
+to{
+
+transform:
+scale(1);
+
+opacity:1;
+}
+
+}
+
+.window-top{
+
+width:100%;
+height:11%;
+
+background:
+linear-gradient(
+to bottom,
+#111,
+#000);
+
+color:#9ed8ff;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:0 .8vw;
+
+border-bottom:3px solid #222;
+
+cursor:grab;
+
+font-size:
+clamp(14px,1.3vw,24px);
+}
+
+.window-buttons{
+
+display:flex;
+gap:.3vw;
+}
+
+.win-btn{
+
+width:1.5vw;
+min-width:18px;
+
+aspect-ratio:1/1;
+
+background:#9ed8ff;
+
+border:2px solid black;
+}
+
+.file-path{
+
+width:100%;
+min-height:7.5%;
+
+background:#b9e8ff;
+
+border-bottom:
+2px solid rgba(0,0,0,.15);
+
+display:flex;
+align-items:center;
+
+padding:0 .8vw;
+}
+
+.file-list{
+
+width:100%;
+min-height:10%;
+
+background:#c8eeff;
+
+display:flex;
+align-items:center;
+
+border-bottom:
+3px solid rgba(0,0,0,.15);
+}
+
+.file-item{
+
+height:100%;
+
+display:flex;
+align-items:center;
+
+padding:0 1vw;
+
+position:relative;
+
+cursor:pointer;
+}
+
+.file-item::after{
+
+content:"";
+
+position:absolute;
+
+right:0;
+top:20%;
+
+width:2px;
+height:60%;
+
+background:
+rgba(0,0,0,.2);
+}
+
+.file-item:last-child::after{
+
+display:none;
+}
+
+.file-item.active{
+
+background:white;
+
+border-top:3px solid black;
+}
+
+.window-content{
+
+flex:1;
+
+overflow:auto;
+
+padding:1vw;
+
+font-size:
+clamp(15px,1.5vw,28px);
+
+line-height:1.2;
+}
+
+.statusbar{
+
+width:100%;
+height:7.5%;
+
+background:black;
+
+color:#9ed8ff;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:0 .8vw;
+
+border-top:3px solid #222;
+}
+
+/* ===== TASKBAR ===== */
+
+.taskbar{
+
+position:absolute;
+
+left:0;
+bottom:0;
+
+width:100%;
+height:7%;
+
+background:
+linear-gradient(
+to bottom,
+#111,
+#000);
+
+border-top:3px solid #222;
+
+display:flex;
+align-items:center;
+
+gap:.5vw;
+
+padding:0 .5vw;
+
+z-index:999;
+}
+
+.start{
+
+height:72%;
+
+background:#9ed8ff;
+
+border:2px solid black;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+padding:0 1vw;
+}
+
+.task-area{
+
+flex:1;
+
+display:flex;
+gap:.4vw;
+
+overflow:hidden;
+}
+
+.task{
+
+height:72%;
+
+min-width:140px;
+
+background:#84d5ff;
+
+border:2px solid black;
+
+display:flex;
+align-items:center;
+
+padding:0 .7vw;
+}
+
+.task-time{
+
+height:72%;
+
+min-width:70px;
+
+background:#9ed8ff;
+
+border:2px solid black;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+padding:0 .5vw;
+}
+
+/* ===== ERROR ===== */
+
+.error-popup{
+
+position:absolute;
+
+width:240px;
+
+background:#d8ecff;
+
+border:4px solid black;
+
+box-shadow:
+8px 8px 0 rgba(0,0,0,.2);
+
+z-index:6000;
+
+animation:
+popup .08s ease;
+}
+
+.error-top{
+
+width:100%;
+height:36px;
+
+background:
+linear-gradient(
+to bottom,
+#111,
+#000);
+
+color:#9ed8ff;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+padding:0 10px;
+
+font-size:22px;
+}
+
+.error-close{
+
+width:22px;
+height:22px;
+
+background:#9ed8ff;
+
+border:2px solid black;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+cursor:pointer;
+}
+
+.error-content{
+
+padding:18px;
+
+font-size:24px;
+}
+
+.error-button{
+
+margin-top:12px;
+
+background:#9ed8ff;
+
+border:3px solid black;
+
+display:inline-block;
+
+padding:4px 12px;
+
+cursor:pointer;
+}
+
+@keyframes popup{
+
+from{
+
+transform:
+scale(.7);
+
+opacity:0;
+}
+
+to{
+
+transform:
+scale(1);
+
+opacity:1;
+}
+
+}
+
+.glitch{
+
+animation:
+glitch .03s infinite;
+}
+
+@keyframes glitch{
+
+0%{
+transform:translateX(0px);
+}
+
+20%{
+transform:translateX(-4px);
+}
+
+40%{
+transform:translateX(4px);
+}
+
+60%{
+transform:translateX(-2px);
+}
+
+80%{
+transform:translateX(2px);
+}
+
+100%{
+transform:translateX(0px);
+}
+
+}
+
+@media(max-width:700px){
+
+.monitor{
+
+width:100vw;
+height:100vh;
+
+aspect-ratio:auto;
+
+border:none;
+}
+
+.window{
+
+width:84%;
+height:62%;
+}
+
+.icon{
+
+width:26%;
+}
+
+.error-popup{
+
+width:200px;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<audio
+id="bgm"
+loop
+preload="auto"
+src="https://met-lu.vercel.app/kanematsutei-strong-rain-145334.mp3">
+</audio>
+
+<audio
+id="clickSound"
+preload="auto"
+src="https://met-lu.vercel.app/99A0823E5F71F3CB02.mp3">
+</audio>
+
+<audio
+id="doubleSound"
+preload="auto"
+src="https://met-lu.vercel.app/99A59B4D5F71EA6C2D.mp3">
+</audio>
+
+<audio
+id="errorSound"
+preload="auto"
+src="https://met-lu.vercel.app/hisound-phone-glitch-connection-error-451540.mp3">
+</audio>
+
+<audio
+id="errorSpam"
+preload="auto"
+src="https://met-lu.vercel.app/universfield-error-03-125761.mp3">
+</audio>
+
+<div class="monitor"
+id="monitor">
+
+<div class="darkness"
+id="darkness"></div>
+
+<div class="chromatic">
+
+<div class="rgb-red"></div>
+<div class="rgb-blue"></div>
+<div class="rgb-green"></div>
+
+</div>
+
+<div class="systembar">
+
+<div class="leftmenu">
+
+<div class="menu-btn">FILE</div>
+<div class="menu-btn">EDIT</div>
+<div class="menu-btn">VIEW</div>
+<div class="menu-btn">HELP</div>
+<div class="menu-btn" id="fullscreenBtn">FULL</div>
+
+</div>
+
+<div id="versionText">
+LOG_SYS v9.5
+</div>
+
+</div>
+
+<div class="desktop"
+id="desktop">
+
+<div class="icon"
+id="recoveredIcon">
+
+<div class="icon-img">📁</div>
+
+<div class="icon-text">
+RECOVERED
+</div>
+
+</div>
+
+<div class="icon"
+id="fileIcon">
+
+<div class="icon-img">📁</div>
+
+<div class="icon-text">
+FILE
+</div>
+
+</div>
+
+<div class="taskbar">
+
+<div class="start">
+START
+</div>
+
+<div class="task-area">
+
+<div class="task">
+system_manager.exe
+</div>
+
+<div class="task">
+audio_driver.exe
+</div>
+
+</div>
+
+<div class="task-time"
+id="tasktime">
+03:17
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* ===== AUDIO ===== */
+
+const bgm =
+document.getElementById(
+"bgm"
+);
+
+const clickSound =
+document.getElementById(
+"clickSound"
+);
+
+const doubleSound =
+document.getElementById(
+"doubleSound"
+);
+
+const errorSound =
+document.getElementById(
+"errorSound"
+);
+
+const errorSpam =
+document.getElementById(
+"errorSpam"
+);
+
+function startBGM(){
+
+bgm.volume = 0.35;
+
+bgm.play().catch(()=>{});
+
+document.removeEventListener(
+"pointerdown",
+startBGM
+);
+
+}
+
+document.addEventListener(
+"pointerdown",
+startBGM
+);
+
+function playSound(audio,volume=.6,rate=1){
+
+const clone =
+audio.cloneNode();
+
+clone.volume =
+volume;
+
+clone.playbackRate =
+rate;
+
+clone.play();
+
+}
+
+/* ===== SYSTEM ===== */
+
+const desktop =
+document.getElementById(
+"desktop"
+);
+
+const monitor =
+document.getElementById(
+"monitor"
+);
+
+const darkness =
+document.getElementById(
+"darkness"
+);
+
+const versionText =
+document.getElementById(
+"versionText"
+);
+
+let zIndexCounter = 10;
+
+let errorLevel = 0;
+
+let rebootCount = 0;
+
+/* ===== DATA ===== */
+
+let folders = {
+
+recovered:{
+
+title:
+"recovered_system_logs.txt",
+
+path:
+"C:/SYSTEM/RECOVERED/",
+
+files:[
+"boot_log.txt",
+"memory_dump.txt",
+"do_not_open.txt"
+],
+
+content:`
+SYSTEM RECOVERY LOG<br><br>
+
+03:11 - USER FOUND<br>
+03:13 - MEMORY LOSS DETECTED<br>
+03:14 - UNKNOWN SIGNAL RECEIVED<br><br>
+
+WARNING : DATA CORRUPTION
+`
+},
+
+file:{
+
+title:
+"file_directory.txt",
+
+path:
+"C:/SYSTEM/FILE/",
+
+files:[
+"recovered",
+"image_data.png",
+"voice_017.wav",
+"notes.txt"
+],
+
+content:`
+FILE DIRECTORY<br><br>
+
+recovered/<br>
+image_data.png<br>
+voice_017.wav<br>
+notes.txt
+`
+}
+
+};
+
+/* ===== FINAL MODE ===== */
+
+function activateFinalMode(){
+
+document.body.classList.add(
+"insane-mode"
+);
+
+versionText.innerText =
+"LOG_SYS v1.0";
+
+folders = {
+
+recovered:{
+
+title:
+"recovered_system_logs.txt",
+
+path:
+"C:/SYSTEM/REC0VERED/",
+
+files:[
+"boot_l0g.txt",
+"mem0ry_dump.txt",
+"d0_not_open.txt"
+],
+
+content:`
+SYSTEM RECOVERY LOG<br><br>
+
+03:11 - USER FOUND<br>
+03:13 - MEM0RY L0SS DETECTED<br>
+03:14 - UNKNOWN SIGNAL RECEIVED<br><br>
+
+WARNlNG : DATA C0RRUPTION
+`
+},
+
+file:{
+
+title:
+"file_directory.txt",
+
+path:
+"C:/SYSTEM/F1LE/",
+
+files:[
+"recovered",
+"image_d@ta.png",
+"v0ice_017.wav",
+"n0tes.txt"
+],
+
+content:`
+FILE DIRECTORY<br><br>
+
+recovered/<br>
+image_d@ta.png<br>
+v0ice_017.wav<br>
+n0tes.txt
+`
+}
+
+};
+
+}
+
+/* ===== REBOOT ===== */
+
+function rebootSystem(){
+
+rebootCount++;
+
+darkness.style.opacity =
+"1";
+
+setTimeout(()=>{
+
+document
+.querySelectorAll(
+".window"
+)
+.forEach(el=>{
+
+el.remove();
+
+});
+
+errorLevel = 0;
+
+if(rebootCount === 1){
+
+versionText.innerText =
+"LOG_SYS v10.0";
+
+folders = {
+
+recovered:{
+
+title:
+"recovered_memory_fragment.txt",
+
+path:
+"C:/UNKNOWN/RECOVERED/",
+
+files:[
+"face_01.png",
+"where_am_i.txt",
+"last_signal.wav"
+],
+
+content:`
+RECOVERY FAILED<br><br>
+
+USER MEMORY MISSING<br>
+VOICE DETECTED<br><br>
+
+"don't look behind you"
+`
+},
+
+file:{
+
+title:
+"system_archive.txt",
+
+path:
+"C:/ARCHIVE/",
+
+files:[
+"old_logs",
+"camera_feed.mp4",
+"███.txt",
+"deleted_user"
+],
+
+content:`
+ARCHIVE OPENED<br><br>
+
+camera_feed.mp4<br>
+deleted_user<br>
+██████████
+`
+}
+
+};
+
+}
+
+else{
+
+activateFinalMode();
+
+}
+
+setTimeout(()=>{
+
+darkness.style.opacity =
+"0";
+
+},400);
+
+},2200);
+
+}
+
+/* ===== WINDOW ===== */
+
+function createWindow(type){
+
+const data = folders[type];
+
+const windowEl =
+document.createElement(
+"div"
+);
+
+windowEl.className =
+"window";
+
+windowEl.style.left =
+Math.random()*150+80
++"px";
+
+windowEl.style.top =
+Math.random()*80+70
++"px";
+
+windowEl.style.zIndex =
+zIndexCounter++;
+
+windowEl.innerHTML = `
+
+<div class="window-top">
+
+<div>
+${data.title}
+</div>
+
+<div class="window-buttons">
+
+<div class="win-btn"></div>
+<div class="win-btn"></div>
+<div class="win-btn close-btn"></div>
+
+</div>
+
+</div>
+
+<div class="file-path">
+${data.path}
+</div>
+
+<div class="file-list">
+
+${data.files.map((file,index)=>`
+
+<div class="file-item
+${index===0 ? "active" : ""}">
+${file}
+</div>
+
+`).join("")}
+
+</div>
+
+<div class="window-content">
+
+${data.content}
+
+</div>
+
+<div class="statusbar">
+
+<span>
+STATUS : UNSTABLE
+</span>
+
+<span>
+03:17 AM
+</span>
+
+</div>
+
+`;
+
+desktop.appendChild(
+windowEl
+);
+
+makeDraggable(
+windowEl
+);
+
+const items =
+windowEl.querySelectorAll(
+".file-item"
+);
+
+items.forEach(item=>{
+
+item.addEventListener(
+"click",
+()=>{
+
+playSound(
+clickSound,
+0.45
+);
+
+items.forEach(el=>{
+
+el.classList.remove(
+"active"
+);
+
+});
+
+item.classList.add(
+"active"
+);
+
+if(
+item.innerText.includes(
+"open"
+)
+||
+item.innerText.includes(
+"voice"
+)
+||
+item.innerText.includes(
+"camera"
+)
+||
+item.innerText.includes(
+"where"
+)
+){
+
+spawnErrors(
+"SYSTEM FAILURE"
+);
+
+}
+
+});
+
+});
+
+windowEl
+.querySelector(
+".close-btn"
+)
+.addEventListener(
+"click",
+()=>{
+
+playSound(
+clickSound,
+0.45
+);
+
+windowEl.remove();
+
+});
+
+}
+
+/* ===== ERROR ===== */
+
+function spawnErrors(text){
+
+errorLevel++;
+
+monitor.classList.add(
+"glitch"
+);
+
+darkness.style.opacity =
+(errorLevel * 0.18)
+.toString();
+
+/* 느려졌다 빨라졌다 */
+
+const weirdRate =
+Math.random() > .5
+? 0.7
+: 1.4;
+
+playSound(
+errorSound,
+0.8,
+weirdRate
+);
+
+for(let i=0;i<5;i++){
+
+setTimeout(()=>{
+
+playSound(
+errorSpam,
+0.45,
+Math.random() > .5 ? 0.75 : 1.3
+);
+
+createErrorPopup(
+text
+);
+
+},i*110);
+
+}
+
+setTimeout(()=>{
+
+monitor.classList.remove(
+"glitch"
+);
+
+},1200);
+
+if(errorLevel >= 3){
+
+setTimeout(()=>{
+
+rebootSystem();
+
+},1800);
+
+}
+
+}
+
+function createErrorPopup(
+text
+){
+
+const popup =
+document.createElement(
+"div"
+);
+
+popup.className =
+"error-popup";
+
+const rect =
+monitor.getBoundingClientRect();
+
+popup.style.left =
+(rect.width/2-120+
+(Math.random()*180)-90)
++"px";
+
+popup.style.top =
+(rect.height/2-90+
+(Math.random()*120)-60)
++"px";
+
+popup.innerHTML = `
+
+<div class="error-top">
+
+<div>
+ERROR
+</div>
+
+<div class="error-close">
+X
+</div>
+
+</div>
+
+<div class="error-content">
+
+⚠ ${text}
+
+<br>
+
+<div class="error-button">
+OK
+</div>
+
+</div>
+
+`;
+
+desktop.appendChild(
+popup
+);
+
+popup
+.querySelector(
+".error-button"
+)
+.addEventListener(
+"click",
+()=>{
+
+playSound(
+clickSound,
+0.45
+);
+
+popup.remove();
+
+});
+
+popup
+.querySelector(
+".error-close"
+)
+.addEventListener(
+"click",
+()=>{
+
+playSound(
+clickSound,
+0.45
+);
+
+popup.remove();
+
+});
+
+}
+
+/* ===== DRAG ===== */
+
+function makeDraggable(windowEl){
+
+const topbar =
+windowEl.querySelector(
+".window-top"
+);
+
+let dragging = false;
+
+let offsetX = 0;
+let offsetY = 0;
+
+function moveWindow(e){
+
+if(!dragging) return;
+
+const rect =
+desktop.getBoundingClientRect();
+
+let x =
+e.clientX -
+rect.left -
+offsetX;
+
+let y =
+e.clientY -
+rect.top -
+offsetY;
+
+const maxX =
+rect.width -
+windowEl.offsetWidth;
+
+const maxY =
+rect.height -
+windowEl.offsetHeight -
+45;
+
+x = Math.max(
+0,
+Math.min(x,maxX)
+);
+
+y = Math.max(
+0,
+Math.min(y,maxY)
+);
+
+windowEl.style.left =
+x+"px";
+
+windowEl.style.top =
+y+"px";
+}
+
+function stopDragging(){
+
+dragging = false;
+
+window.removeEventListener(
+"pointermove",
+moveWindow
+);
+
+window.removeEventListener(
+"pointerup",
+stopDragging
+);
+
+}
+
+topbar.addEventListener(
+"pointerdown",
+(e)=>{
+
+dragging = true;
+
+const rect =
+windowEl.getBoundingClientRect();
+
+offsetX =
+e.clientX -
+rect.left;
+
+offsetY =
+e.clientY -
+rect.top;
+
+windowEl.style.zIndex =
+zIndexCounter++;
+
+window.addEventListener(
+"pointermove",
+moveWindow
+);
+
+window.addEventListener(
+"pointerup",
+stopDragging
+);
+
+});
+
+}
+
+/* ===== DOUBLE CLICK ===== */
+
+function setupDoubleClick(
+id,
+type
+){
+
+const icon =
+document.getElementById(id);
+
+let clickCount = 0;
+let clickTimer = null;
+
+icon.addEventListener(
+"click",
+()=>{
+
+clickCount++;
+
+document
+.querySelectorAll(".icon")
+.forEach(el=>{
+
+el.classList.remove(
+"selected"
+);
+
+});
+
+icon.classList.add(
+"selected"
+);
+
+if(clickCount === 1){
+
+clickTimer =
+setTimeout(()=>{
+
+playSound(
+clickSound,
+0.45
+);
+
+clickCount = 0;
+
+},250);
+
+}
+
+else if(clickCount === 2){
+
+clearTimeout(
+clickTimer
+);
+
+playSound(
+doubleSound,
+0.6
+);
+
+createWindow(type);
+
+clickCount = 0;
+
+}
+
+});
+
+}
+
+setupDoubleClick(
+"recoveredIcon",
+"recovered"
+);
+
+setupDoubleClick(
+"fileIcon",
+"file"
+);
+
+/* ===== CLOCK ===== */
+
+function updateTime(){
+
+const now = new Date();
+
+let h =
+now.getHours();
+
+let m =
+now.getMinutes();
+
+let h12 =
+h % 12;
+
+h12 = h12 ?
+h12 : 12;
+
+m = m < 10 ?
+"0"+m : m;
+
+document
+.getElementById(
+"tasktime"
+)
+.innerHTML =
+`${h12}:${m}`;
+
+}
+
+setInterval(
+updateTime,
+1000
+);
+
+updateTime();
+
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+fullscreenBtn.addEventListener("click", () => {
+    const doc = document.documentElement;
+
+    if (!document.fullscreenElement) {
+        doc.requestFullscreen().catch(err => {
+            console.log("fullscreen failed:", err);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+});
+
+document.addEventListener("fullscreenchange", () => {
+    fullscreenBtn.innerText = document.fullscreenElement ? "EXIT" : "FULL";
+});
+
+</script>
+
+</body>
+</html>
