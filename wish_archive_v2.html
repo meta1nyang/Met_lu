@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>기록</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    background:#000;
+    color:#f2f2f2;
+    font-family:'Noto Sans KR',sans-serif;
+    font-weight:100;
+    letter-spacing:.12em;
+}
+.screen{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    box-sizing:border-box;
+}
+h1{
+    font-weight:100;
+    letter-spacing:.45em;
+}
+#timer{
+    font-size:2rem;
+    margin:15px;
+}
+canvas{
+    background:#fff;
+    width:min(90vw,500px);
+    height:300px;
+    border:1px solid #222;
+    touch-action:none;
+}
+button{
+    margin-top:16px;
+    background:#050505;
+    color:#ddd;
+    border:1px solid #222;
+    padding:10px 18px;
+    font-weight:100;
+}
+.small{
+    margin-top:10px;
+    color:#666;
+}
+#archive{
+    display:none;
+    padding:24px;
+}
+.meta{
+    color:#777;
+    margin-bottom:30px;
+}
+.record{
+    padding:12px 0;
+    border-bottom:1px solid #111;
+    color:#d8d8d8;
+}
+</style>
+</head>
+<body>
+
+<div id="entry" class="screen">
+<h1>기록</h1>
+<div id="timer">01:00</div>
+<canvas id="c" width="500" height="300"></canvas>
+<button onclick="submitWish()">기록하기</button>
+<div class="small">내용은 공개되지 않습니다.</div>
+</div>
+
+<div id="archive">
+<h1>기록 보관소</h1>
+<div class="meta">
+최초 기록<br>
+1998.02.03
+<br><br>
+현재 보관 중<br>
+<span id="count">4,821,392</span>
+</div>
+
+<div id="records"></div>
+</div>
+
+<script>
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+document.addEventListener("click",()=>{
+try{
+const ctx=new AudioContextClass();
+const o1=ctx.createOscillator();
+const o2=ctx.createOscillator();
+const g=ctx.createGain();
+
+o1.type="square";
+o2.type="sawtooth";
+
+o1.frequency.value=113;
+o2.frequency.value=117.7;
+
+g.gain.value=0.008;
+
+o1.connect(g);
+o2.connect(g);
+g.connect(ctx.destination);
+
+o1.start();
+o2.start();
+}catch(e){}
+},{once:true});
+
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+ctx.lineWidth=3;
+
+let draw=false;
+
+function p(e){
+const r=canvas.getBoundingClientRect();
+if(e.touches){
+return {
+x:e.touches[0].clientX-r.left,
+y:e.touches[0].clientY-r.top
+};
+}
+return {x:e.clientX-r.left,y:e.clientY-r.top};
+}
+
+function start(e){
+draw=true;
+const pos=p(e);
+ctx.beginPath();
+ctx.moveTo(pos.x,pos.y);
+}
+
+function move(e){
+if(!draw) return;
+const pos=p(e);
+ctx.lineTo(pos.x,pos.y);
+ctx.stroke();
+}
+
+canvas.addEventListener("mousedown",start);
+canvas.addEventListener("mousemove",move);
+window.addEventListener("mouseup",()=>draw=false);
+
+canvas.addEventListener("touchstart",start);
+canvas.addEventListener("touchmove",(e)=>{
+e.preventDefault();
+move(e);
+});
+canvas.addEventListener("touchend",()=>draw=false);
+
+let t=60;
+const timer=document.getElementById("timer");
+
+const cd=setInterval(()=>{
+t--;
+timer.textContent=`00:${String(t).padStart(2,"0")}`;
+
+if(t<=0){
+clearInterval(cd);
+location.href="https://www.google.com";
+}
+},1000);
+
+function submitWish(){
+clearInterval(cd);
+
+document.getElementById("entry").style.display="none";
+document.getElementById("archive").style.display="block";
+
+const records=document.getElementById("records");
+
+const mine=document.createElement("div");
+mine.className="record";
+mine.innerHTML=new Date().toLocaleString("ko-KR")+"<br>기록됨";
+records.appendChild(mine);
+
+const years=[2026,2025,2024,2022,2018,2014,2010,2007,2004,2001,1998];
+
+for(let i=0;i<300;i++){
+const y=years[Math.floor(Math.random()*years.length)];
+
+const m=String(Math.ceil(Math.random()*12)).padStart(2,"0");
+const d=String(Math.ceil(Math.random()*28)).padStart(2,"0");
+const h=String(Math.floor(Math.random()*24)).padStart(2,"0");
+const min=String(Math.floor(Math.random()*60)).padStart(2,"0");
+
+let state="기록됨";
+
+if(Math.random()<0.06) state="열람 불가";
+if(Math.random()<0.02) state="철회되지 않음";
+
+const div=document.createElement("div");
+div.className="record";
+div.innerHTML=`${y}.${m}.${d} ${h}:${min}<br>${state}`;
+records.appendChild(div);
+}
+
+let count=4821392;
+
+setInterval(()=>{
+count += Math.floor(Math.random()*5);
+document.getElementById("count").textContent=count.toLocaleString();
+},3000);
+}
+</script>
+</body>
+</html>
