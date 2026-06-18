@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phobia Test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300&family=Noto+Sans+JP:wght@100;200;300&family=Noto+Sans+KR:wght@100;200;300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fff; --fg: #000; --muted: #888; --border: #e0e0e0;
+  --hover-bg: #f4f4f4; --active-bg: #000; --active-fg: #fff;
+  --bar-bg: #e8e8e8; --bar-fill: #000;
+  --font-main: 'Inter', 'Noto Sans KR', 'Noto Sans JP', sans-serif;
+}
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-main); font-weight: 200;
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+}
+.lang-bar {
+  width: 100%; display: flex; justify-content: flex-end;
+  padding: 1.2rem 2.5rem 0; gap: 1.2rem;
+}
+.lang-btn {
+  background: none; border: none; font-family: var(--font-main);
+  font-weight: 200; font-size: 0.75rem; letter-spacing: 0.12em;
+  color: var(--muted); cursor: pointer; transition: color 0.2s;
+  padding: 0; text-transform: uppercase;
+}
+.lang-btn.active, .lang-btn:hover { color: var(--fg); }
+.lang-btn.active { font-weight: 300; }
+.container { width: 100%; max-width: 640px; padding: 3.5rem 2rem 5rem; }
+.header { text-align: center; margin-bottom: 4rem; }
+.subtitle {
+  font-size: 0.68rem; letter-spacing: 0.25em; color: var(--muted);
+  text-transform: uppercase; margin-bottom: 1.2rem; font-weight: 200;
+}
+h1 { font-size: 2.4rem; font-weight: 100; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 1rem; }
+.desc { font-size: 0.82rem; color: var(--muted); font-weight: 200; letter-spacing: 0.04em; line-height: 1.8; }
+
+/* SELECT SCREEN */
+.select-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 2.5rem;
+}
+.phobia-card {
+  background: none; border: 1px solid var(--border);
+  font-family: var(--font-main); font-weight: 200; cursor: pointer;
+  padding: 1.4rem 1.2rem; text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+  display: flex; flex-direction: column; gap: 0.4rem;
+}
+.phobia-card:hover { background: var(--hover-bg); border-color: #bbb; }
+.phobia-card.selected {
+  background: var(--active-bg); border-color: var(--active-bg);
+}
+.phobia-card .card-num {
+  font-size: 0.58rem; letter-spacing: 0.2em; color: var(--muted);
+  text-transform: uppercase; font-weight: 200;
+}
+.phobia-card.selected .card-num { color: #666; }
+.phobia-card .card-name {
+  font-size: 0.9rem; font-weight: 200; color: var(--fg);
+  letter-spacing: 0.02em; line-height: 1.3;
+}
+.phobia-card.selected .card-name { color: var(--active-fg); }
+.phobia-card .card-desc {
+  font-size: 0.68rem; color: var(--muted); font-weight: 200;
+  letter-spacing: 0.03em; line-height: 1.5; margin-top: 0.2rem;
+}
+.phobia-card.selected .card-desc { color: #999; }
+.select-hint {
+  font-size: 0.68rem; letter-spacing: 0.12em; color: var(--muted);
+  font-weight: 200; text-align: center; margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+/* TEST */
+.progress-wrap { margin-bottom: 3rem; }
+.progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.68rem; letter-spacing: 0.15em; color: var(--muted);
+  margin-bottom: 0.6rem; font-weight: 200; text-transform: uppercase;
+}
+.progress-bar { width: 100%; height: 1px; background: var(--bar-bg); }
+.progress-fill { height: 1px; background: var(--bar-fill); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.question-block { margin-bottom: 2.5rem; }
+.q-num { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.8rem; font-weight: 200; text-transform: uppercase; }
+.q-text { font-size: 1.08rem; font-weight: 200; letter-spacing: 0.01em; line-height: 1.65; margin-bottom: 1.4rem; }
+.options { display: flex; flex-direction: column; gap: 0.55rem; }
+.option-btn {
+  background: none; border: 1px solid var(--border); font-family: var(--font-main);
+  font-weight: 200; font-size: 0.82rem; letter-spacing: 0.04em; color: var(--fg);
+  cursor: pointer; padding: 0.9rem 1.2rem; text-align: left;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  display: flex; align-items: center; gap: 0.9rem; line-height: 1.5;
+}
+.option-btn .opt-label {
+  font-size: 0.6rem; letter-spacing: 0.18em; color: var(--muted);
+  text-transform: uppercase; flex-shrink: 0; font-weight: 200; min-width: 18px;
+}
+.option-btn:hover { background: var(--hover-bg); border-color: #bbb; }
+.option-btn.selected { background: var(--active-bg); border-color: var(--active-bg); color: var(--active-fg); }
+.option-btn.selected .opt-label { color: #888; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; }
+.nav-btn {
+  background: none; border: 1px solid var(--border); font-family: var(--font-main);
+  font-weight: 200; font-size: 0.75rem; letter-spacing: 0.15em; color: var(--fg);
+  cursor: pointer; padding: 0.7rem 1.6rem; text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.nav-btn:hover { background: var(--hover-bg); }
+.nav-btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.nav-btn.primary:hover { opacity: 0.8; }
+.nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+/* RESULT */
+.result-header { text-align: center; margin-bottom: 3rem; }
+.result-header .subtitle { margin-bottom: 1rem; }
+.result-score { font-size: 5rem; font-weight: 100; letter-spacing: -0.04em; line-height: 1; margin-bottom: 0.4rem; }
+.result-level { font-size: 1rem; font-weight: 200; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1.5rem; }
+.result-desc { font-size: 0.82rem; color: var(--muted); font-weight: 200; line-height: 1.8; max-width: 420px; margin: 0 auto; }
+.result-bars { margin: 2.5rem 0 3rem; }
+.bar-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; transition: opacity 0.4s ease; }
+.bar-label { font-size: 0.7rem; font-weight: 200; letter-spacing: 0.08em; color: var(--muted); width: 160px; flex-shrink: 0; line-height: 1.3; text-transform: uppercase; }
+.bar-track { flex: 1; height: 1px; background: var(--bar-bg); }
+.bar-track-fill { height: 1px; background: var(--bar-fill); transition: width 0.9s cubic-bezier(0.4,0,0.2,1) !important; }
+.bar-pct { font-size: 0.68rem; font-weight: 200; color: var(--muted); width: 34px; text-align: right; letter-spacing: 0.05em; }
+.bar-row.top-phobia .bar-label { color: var(--fg); font-weight: 300; }
+.bar-row.top-phobia .bar-pct { color: var(--fg); font-weight: 300; }
+.bar-row.top-phobia .bar-track-fill { height: 2px; margin-top: -0.5px; }
+.bar-row.top-phobia .bar-track { height: 2px; }
+.top-badge {
+  font-size: 0.58rem; letter-spacing: 0.18em; color: var(--fg);
+  text-transform: uppercase; border: 1px solid var(--fg); padding: 0.15rem 0.5rem;
+  margin-left: 0.6rem; font-weight: 200; vertical-align: middle; display: inline-block;
+  animation: badgeIn 0.5s 0.7s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes badgeIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+.divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0; }
+.restart-btn {
+  display: block; margin: 0 auto; background: none; border: 1px solid var(--border);
+  font-family: var(--font-main); font-weight: 200; font-size: 0.72rem;
+  letter-spacing: 0.2em; color: var(--muted); cursor: pointer;
+  padding: 0.75rem 2rem; text-transform: uppercase; transition: border-color 0.15s, color 0.15s;
+}
+.restart-btn:hover { border-color: #999; color: var(--fg); }
+.dominant-block {
+  margin: 0 0 2.5rem; padding: 1.4rem 0;
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  animation: screenIn 0.55s 0.2s cubic-bezier(0.4,0,0.2,1) both;
+}
+.dominant-label { font-size: 0.62rem; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; font-weight: 200; margin-bottom: 0.55rem; }
+.dominant-name { font-size: 1.5rem; font-weight: 100; letter-spacing: -0.01em; line-height: 1.2; }
+.phobia-tag {
+  font-size: 0.65rem; letter-spacing: 0.18em; color: var(--muted);
+  text-transform: uppercase; font-weight: 200; margin-bottom: 0.3rem;
+}
+
+/* ANIMATIONS */
+.fade-in { animation: fadeIn 0.4s cubic-bezier(0.4,0,0.2,1); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.screen { display: none; opacity: 0; }
+.screen.active { display: block; animation: screenIn 0.55s cubic-bezier(0.4,0,0.2,1) forwards; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.disclaimer {
+  font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em;
+  font-weight: 200; text-align: center; line-height: 1.7; margin-top: 2rem;
+}
+</style>
+</head>
+<body>
+
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('en')">EN</button>
+  <button class="lang-btn" onclick="setLang('ko')">한국어</button>
+  <button class="lang-btn" onclick="setLang('ja')">日本語</button>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="screen active">
+    <div class="header">
+      <p class="subtitle" data-i18n="intro.subtitle">Psychological Assessment</p>
+      <h1 data-i18n="intro.title">Phobia<br>Test</h1>
+      <p class="desc" data-i18n="intro.desc">Select a phobia category and answer 20 questions honestly.</p>
+    </div>
+    <button class="nav-btn primary" style="width:100%;text-align:center;padding:1rem;" onclick="goSelect()" data-i18n="intro.start">Choose Phobia</button>
+    <p class="disclaimer" style="margin-top:1.5rem" data-i18n="intro.disclaimer">Not a clinical diagnosis · For informational purposes only</p>
+  </div>
+
+  <!-- SELECT -->
+  <div id="screen-select" class="screen">
+    <div class="header" style="margin-bottom:2rem">
+      <p class="subtitle" data-i18n="select.subtitle">Select Category</p>
+      <h1 data-i18n="select.title">What are<br>you afraid of?</h1>
+    </div>
+    <p class="select-hint" data-i18n="select.hint">Choose one to begin</p>
+    <div class="select-grid" id="select-grid"></div>
+    <button class="nav-btn" style="width:100%;text-align:center;" onclick="goIntro()" data-i18n="select.back">Back</button>
+  </div>
+
+  <!-- TEST -->
+  <div id="screen-test" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="test-phobia-name" style="text-transform:uppercase;letter-spacing:0.15em;"></span>
+        <span id="prog-num">1 / 20</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:5%"></div></div>
+    </div>
+    <div class="question-block fade-in" id="q-block">
+      <div class="q-num" id="q-num">01</div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btn-prev" onclick="prevQ()" data-i18n="test.prev">Prev</button>
+      <button class="nav-btn primary" id="btn-next" onclick="nextQ()" data-i18n="test.next">Next</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="screen-result" class="screen">
+    <div class="result-header">
+      <p class="subtitle" data-i18n="result.subtitle">Your Results</p>
+      <div class="phobia-tag" id="res-phobia-tag"></div>
+      <div class="result-score" id="res-score">0</div>
+      <div class="result-level" id="res-level"></div>
+      <p class="result-desc" id="res-desc"></p>
+    </div>
+    <div class="divider"></div>
+    <div class="result-bars" id="result-bars"></div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:0.75rem;justify-content:center;">
+      <button class="restart-btn" onclick="goSelect()" data-i18n="result.other">Try Another</button>
+      <button class="restart-btn" onclick="retakeSame()" data-i18n="result.retake">Retake</button>
+    </div>
+    <p class="disclaimer" style="margin-top:1.5rem" data-i18n="intro.disclaimer">Not a clinical diagnosis · For informational purposes only</p>
+  </div>
+
+</div>
+
+<script>
+/* ── I18N ── */
+const I18N = {
+  en: {
+    "intro.subtitle": "Psychological Assessment",
+    "intro.title": "Phobia\nTest",
+    "intro.desc": "Select a phobia category and answer 20 questions honestly.",
+    "intro.start": "Choose Phobia",
+    "intro.disclaimer": "Not a clinical diagnosis · For informational purposes only",
+    "select.subtitle": "Select Category",
+    "select.title": "What are\nyou afraid of?",
+    "select.hint": "Choose one to begin",
+    "select.back": "Back",
+    "test.prev": "Prev",
+    "test.next": "Next",
+    "test.finish": "See Results",
+    "result.subtitle": "Your Results",
+    "result.other": "Try Another",
+    "result.retake": "Retake",
+    "result.levels": ["Minimal","Mild","Moderate","High","Severe"],
+    "result.descs": [
+      "You show very few signs of phobic anxiety related to this area. Your reactions fall well within the normal range.",
+      "You experience mild anxiety in certain situations. This is common and manageable, rarely interfering with daily life.",
+      "You show a moderate level of phobic tendency. Certain triggers may cause noticeable anxiety. Mindfulness or brief therapy could help.",
+      "You exhibit high phobic reactivity in this area. These patterns likely affect your daily routine. Professional consultation is recommended.",
+      "You show significant phobic anxiety in this domain. Seeking support from a qualified therapist is strongly recommended."
+    ],
+    "options": ["Not at all","Slightly","Moderately","Very much","Extremely"]
+  },
+  ko: {
+    "intro.subtitle": "심리 평가",
+    "intro.title": "공포증\n테스트",
+    "intro.desc": "공포증 카테고리를 선택하고 20개의 질문에 솔직하게 답하세요.",
+    "intro.start": "공포증 선택하기",
+    "intro.disclaimer": "임상적 진단이 아닙니다 · 정보 제공 목적",
+    "select.subtitle": "카테고리 선택",
+    "select.title": "무엇이\n두려우신가요?",
+    "select.hint": "하나를 선택해 시작하세요",
+    "select.back": "뒤로",
+    "test.prev": "이전",
+    "test.next": "다음",
+    "test.finish": "결과 보기",
+    "result.subtitle": "나의 결과",
+    "result.other": "다른 테스트",
+    "result.retake": "다시 하기",
+    "result.levels": ["매우 낮음","낮음","보통","높음","매우 높음"],
+    "result.descs": [
+      "이 영역에서 공포증적 불안의 징후가 거의 없습니다. 반응이 정상 범위 내에 있습니다.",
+      "특정 상황에서 약간의 불안을 경험하지만 일반적이고 관리 가능한 수준입니다.",
+      "보통 수준의 공포 경향이 있습니다. 특정 자극에서 눈에 띄는 불안이 생길 수 있으며 마음 챙김이 도움될 수 있습니다.",
+      "이 영역에서 높은 공포 반응성이 나타납니다. 전문가 상담을 권장합니다.",
+      "이 영역에서 심각한 공포 불안이 나타납니다. 자격을 갖춘 심리 치료사의 도움을 강력히 권고합니다."
+    ],
+    "options": ["전혀 아니다","약간 그렇다","보통이다","매우 그렇다","극도로 그렇다"]
+  },
+  ja: {
+    "intro.subtitle": "心理的評価",
+    "intro.title": "恐怖症\nテスト",
+    "intro.desc": "カテゴリを選んで、20の質問に正直に答えてください。",
+    "intro.start": "恐怖症を選ぶ",
+    "intro.disclaimer": "臨床診断ではありません · 情報提供のみを目的としています",
+    "select.subtitle": "カテゴリ選択",
+    "select.title": "何が\n怖いですか？",
+    "select.hint": "1つ選んで開始",
+    "select.back": "戻る",
+    "test.prev": "前へ",
+    "test.next": "次へ",
+    "test.finish": "結果を見る",
+    "result.subtitle": "あなたの結果",
+    "result.other": "別のテスト",
+    "result.retake": "やり直す",
+    "result.levels": ["最小限","軽度","中程度","高度","重度"],
+    "result.descs": [
+      "この領域での恐怖症的な不安の兆候はほとんど見られません。反応は正常範囲内です。",
+      "特定の状況で軽度の不安を感じますが、一般的で対処可能なレベルです。",
+      "中程度の恐怖傾向があります。特定の状況で顕著な不安を経験する場合があります。",
+      "この領域での高い恐怖反応性が見られます。専門家への相談をお勧めします。",
+      "この領域で深刻な恐怖不安が見られます。資格を持つセラピストのサポートを強くお勧めします。"
+    ],
+    "options": ["全くない","わずかに","ある程度","非常に","極度に"]
+  }
+};
+
+/* ── PHOBIA DEFINITIONS ── */
+const PHOBIAS = {
+  en: [
+    {
+      id: 'social', name: 'Social Anxiety', desc: 'Fear of judgment & embarrassment',
+      questions: [
+        "Being the center of attention in a group makes me deeply uncomfortable.",
+        "I avoid speaking in public or attending social gatherings whenever possible.",
+        "I feel intense anxiety when I have to make eye contact with strangers.",
+        "I worry excessively about embarrassing myself in front of others.",
+        "After social events, I replay conversations and cringe at what I said.",
+        "I find it hard to start or maintain conversations with unfamiliar people.",
+        "The thought of attending a party alone fills me with dread.",
+        "I feel extremely self-conscious when entering a room full of people.",
+        "I avoid eating or drinking in public because others might notice me.",
+        "Being observed while performing a task makes me noticeably anxious.",
+        "I often decline invitations to avoid social situations.",
+        "I fear that people will notice my anxiety and judge me harshly.",
+        "Making phone calls to strangers causes me significant stress.",
+        "I struggle to speak up in meetings or group discussions.",
+        "I obsessively rehearse conversations before having them.",
+        "I feel my face flush or my voice shake in social settings.",
+        "Returning items to a store or complaining in public feels unbearable.",
+        "I avoid situations where I might be introduced to new people.",
+        "The idea of being photographed or filmed in public makes me very uneasy.",
+        "After social interactions, I feel exhausted and relieved it is over."
+      ]
+    },
+    {
+      id: 'agoraphobia', name: 'Agoraphobia', desc: 'Fear of open or crowded spaces',
+      questions: [
+        "Open, crowded spaces like markets or plazas make me feel panicked.",
+        "I feel anxious when I am far from home with no easy way to return.",
+        "Traveling in planes, trains, or subways causes me significant distress.",
+        "I prefer to stay close to exits whenever I enter a building.",
+        "The thought of being stranded in an unfamiliar place terrifies me.",
+        "I avoid travelling alone in case something bad happens.",
+        "Wide open spaces like fields or parking lots make me feel exposed.",
+        "I feel safe only in certain familiar places.",
+        "Crowded shopping malls or concerts trigger strong anxiety in me.",
+        "I rely on someone accompanying me to feel comfortable going out.",
+        "The thought of fainting in public with no one to help me is frightening.",
+        "I avoid bridges, overpasses, or highways when driving.",
+        "Long queues or waiting rooms make me feel trapped.",
+        "I have avoided going out due to fear of having a panic attack.",
+        "Being far from a hospital or medical help makes me very nervous.",
+        "Travelling to a new city alone fills me with overwhelming anxiety.",
+        "I feel uneasy in situations where leaving quickly is not easy.",
+        "Open landscapes without shelter feel threatening to me.",
+        "I feel more anxious the further I get from my home.",
+        "I sometimes cancel plans because I fear something will go wrong outside."
+      ]
+    },
+    {
+      id: 'claustrophobia', name: 'Claustrophobia', desc: 'Fear of enclosed spaces',
+      questions: [
+        "Being in a small room with no windows makes me feel suffocated.",
+        "I avoid elevators, tunnels, or narrow corridors if at all possible.",
+        "Feeling physically enclosed causes intense panic or dread in me.",
+        "MRI machines or scanning equipment fill me with terror.",
+        "I choose stairs over elevators even on very high floors.",
+        "Being stuck in traffic in a tunnel causes me noticeable anxiety.",
+        "Small airplane seats or compact car interiors make me feel trapped.",
+        "I feel panic if a door is locked and I cannot get out immediately.",
+        "Changing rooms or small toilet cubicles cause me significant discomfort.",
+        "I sleep with a light on or door open to avoid feeling enclosed.",
+        "Crowded buses or trains where I cannot move make me very anxious.",
+        "I need to know where all the exits are before entering a space.",
+        "Being under a low ceiling makes me feel like the walls are closing in.",
+        "The thought of being buried alive fills me with extreme horror.",
+        "I feel uneasy wearing tight clothing around my neck or chest.",
+        "Being wrapped in a blanket or sleeping bag can trigger anxiety.",
+        "Caves, cellars, or underground areas are places I strongly avoid.",
+        "Being held or restrained—even as a hug—can feel overwhelming.",
+        "Wearing a mask or face covering makes me feel I cannot breathe.",
+        "I check windows and doors can open before settling into any room."
+      ]
+    },
+    {
+      id: 'nature', name: 'Nature & Animals', desc: 'Fear of creatures and natural forces',
+      questions: [
+        "The sight of insects, spiders, or snakes fills me with extreme fear.",
+        "Being outdoors near deep water, cliffs, or storms makes me very anxious.",
+        "Large or unpredictable animals cause me significant fear or avoidance.",
+        "I cannot look at photos of spiders or other creatures without feeling sick.",
+        "Thunder and lightning cause me to feel intense panic.",
+        "The idea of being near a beehive or a wasp nest is terrifying.",
+        "I am deeply afraid of dogs even when they appear friendly.",
+        "Swimming in natural water where I cannot see the bottom frightens me.",
+        "I feel intense dread when I notice a moth or fly in my room at night.",
+        "Heights in natural settings like cliffs or mountains cause me to freeze.",
+        "I avoid hiking or outdoor activities because of fear of wildlife.",
+        "The sound of wind or a storm approaching makes me feel very uneasy.",
+        "I am afraid of being attacked by a bird or bat.",
+        "I cannot visit zoos comfortably because of fear of certain animals.",
+        "Seeing worms or slugs on the ground triggers a strong disgust reaction.",
+        "Being near or in the ocean fills me with a sense of danger.",
+        "I panic if an insect lands on my skin unexpectedly.",
+        "I avoid camping because I fear encountering wildlife at night.",
+        "Watching nature documentaries about predators makes me very anxious.",
+        "I feel terror at the thought of a natural disaster such as an earthquake."
+      ]
+    },
+    {
+      id: 'blood', name: 'Blood & Injury', desc: 'Fear of blood, wounds and medical procedures',
+      questions: [
+        "The sight of blood—even on screen—makes me feel faint or nauseous.",
+        "Medical procedures such as injections or surgeries terrify me.",
+        "Seeing wounds or injuries on others causes intense physical reactions.",
+        "I feel dizzy or lightheaded when I think about blood being drawn.",
+        "I avoid watching medical shows or films with injury scenes.",
+        "The sight of a needle makes my heart race and palms sweat.",
+        "I have fainted or come close to fainting at the sight of blood.",
+        "Dental procedures cause me extreme anxiety beyond normal discomfort.",
+        "Hearing about accidents or surgeries in detail makes me feel ill.",
+        "I avoid reading news stories that include descriptions of injuries.",
+        "The idea of getting a cut or bruise fills me with disproportionate dread.",
+        "I tense up or look away when others receive medical care nearby.",
+        "Even a small paper cut can trigger feelings of panic in me.",
+        "I strongly avoid blood donation clinics or medical laboratories.",
+        "Watching surgery on a screen makes me physically feel sick.",
+        "I feel squeamish when others describe physical pain in detail.",
+        "I delay seeking medical help because I fear the procedures involved.",
+        "Wearing bandages or plasters makes me think about the wound underneath.",
+        "The smell of hospitals or antiseptic triggers strong anxiety in me.",
+        "I imagine the worst possible medical outcome when I feel any pain."
+      ]
+    },
+    {
+      id: 'darkness', name: 'Darkness & Unknown', desc: 'Fear of dark and the unseen',
+      questions: [
+        "Being alone in the dark triggers fear or a strong sense of dread.",
+        "Strange noises at night make me convinced something dangerous is nearby.",
+        "Unfamiliar environments—especially at night—cause me significant anxiety.",
+        "The idea of the unknown or uncertainty fills me with persistent dread.",
+        "I sleep with a light on or the TV playing because I fear the dark.",
+        "I avoid going to the basement or attic alone at night.",
+        "Walking to my car alone in an unlit parking lot fills me with fear.",
+        "I feel watched or followed when alone in darkness.",
+        "Power cuts at night trigger immediate and intense panic in me.",
+        "Shadows or unexpected shapes in the dark make me freeze.",
+        "I check under my bed or in my closet before sleeping.",
+        "I feel uneasy passing graveyards, abandoned buildings, or dark alleys.",
+        "The thought of something being hidden in the dark paralyzes me.",
+        "Waking up in the middle of the night disoriented fills me with terror.",
+        "I avoid horror content because the fear stays with me in the dark.",
+        "Going for a walk after dark feels genuinely threatening to me.",
+        "I feel deeply unsettled in rooms with no windows or natural light.",
+        "The idea of being lost in the dark is one of my greatest fears.",
+        "I imagine scenarios of danger when I cannot see my surroundings clearly.",
+        "Darkness makes me feel like I have lost control of my environment."
+      ]
+    }
+  ],
+  ko: [
+    {
+      id: 'social', name: '사회 불안', desc: '판단과 창피에 대한 두려움',
+      questions: [
+        "집단에서 주목받는 것이 매우 불편하게 느껴진다.",
+        "가능하면 공개 발표나 사교 모임을 피하려 한다.",
+        "낯선 사람과 눈을 마주치는 것에 심한 불안을 느낀다.",
+        "다른 사람 앞에서 창피를 당할까봐 지나치게 걱정한다.",
+        "사교 행사 후 대화를 되새기며 내가 한 말이 부끄러워진다.",
+        "낯선 사람과 대화를 시작하거나 이어가는 것이 어렵다.",
+        "혼자 파티에 가야 한다는 생각만으로 두려움이 생긴다.",
+        "사람이 가득한 방에 들어갈 때 매우 자의식이 강해진다.",
+        "다른 사람들이 나를 볼까봐 공공장소에서 먹거나 마시는 걸 피한다.",
+        "누군가가 지켜보는 상황에서 일을 하면 눈에 띄게 불안해진다.",
+        "사회적 상황을 피하기 위해 초대를 자주 거절한다.",
+        "내 불안을 사람들이 알아채고 심하게 판단할 것 같아 두렵다.",
+        "낯선 사람에게 전화를 거는 것이 매우 큰 스트레스다.",
+        "회의나 단체 토론에서 발언하는 것이 어렵다.",
+        "대화 전에 강박적으로 리허설을 한다.",
+        "사회적 상황에서 얼굴이 붉어지거나 목소리가 떨린다.",
+        "공공장소에서 물건을 반품하거나 불평하는 것이 매우 힘들다.",
+        "새로운 사람을 소개받을 수 있는 상황을 피한다.",
+        "공공장소에서 사진 찍히거나 촬영되는 것이 매우 불편하다.",
+        "사교적 교류 후 지쳐서 '끝났다'는 안도감을 느낀다."
+      ]
+    },
+    {
+      id: 'agoraphobia', name: '광장 공포증', desc: '넓거나 붐비는 공간에 대한 두려움',
+      questions: [
+        "시장이나 광장 같은 넓고 혼잡한 공간에서 공황이나 답답함을 느낀다.",
+        "집에서 멀리 떨어져 있을 때 쉽게 돌아갈 수 없다는 생각에 불안해진다.",
+        "비행기, 기차, 지하철 이용이 심한 고통을 준다.",
+        "건물에 들어갈 때 항상 출구 가까이에 있으려 한다.",
+        "낯선 곳에 홀로 갇힌다는 생각이 공포스럽다.",
+        "무슨 일이 생길까봐 혼자 여행하는 것을 피한다.",
+        "넓은 들판이나 주차장 같은 탁 트인 공간에서 노출된 느낌이 든다.",
+        "특정 익숙한 장소에서만 안전하다고 느낀다.",
+        "붐비는 쇼핑몰이나 콘서트장에서 강한 불안이 생긴다.",
+        "밖에 나갈 때 동행자가 있어야 편안하다.",
+        "공공장소에서 쓰러질 경우 도와줄 사람이 없을 것 같다는 생각이 무섭다.",
+        "운전할 때 다리, 고가도로, 고속도로를 피하려 한다.",
+        "긴 줄이나 대기실이 갇힌 느낌을 준다.",
+        "공황 발작이 올까봐 외출을 피한 적이 있다.",
+        "병원이나 의료 도움에서 멀리 있으면 매우 불안해진다.",
+        "낯선 도시로 혼자 여행하는 것이 압도적인 불안을 준다.",
+        "빠르게 자리를 뜨기 어려운 상황에서 불안이 생긴다.",
+        "피할 곳 없는 탁 트인 경치가 위협적으로 느껴진다.",
+        "집에서 멀어질수록 더 불안해진다.",
+        "밖에서 무슨 일이 생길까봐 계획을 취소하는 경우가 있다."
+      ]
+    },
+    {
+      id: 'claustrophobia', name: '폐소 공포증', desc: '밀폐된 공간에 대한 두려움',
+      questions: [
+        "창문 없는 작은 방에 있으면 질식할 것 같은 느낌이 든다.",
+        "엘리베이터, 터널, 좁은 복도를 가능하면 피한다.",
+        "신체적으로 갇힌 느낌이 들면 극심한 공황이나 공포가 생긴다.",
+        "MRI 기계나 스캐닝 장비가 공포스럽다.",
+        "아무리 높은 층이라도 엘리베이터 대신 계단을 선택한다.",
+        "터널 속 교통 정체가 눈에 띄는 불안을 준다.",
+        "좁은 비행기 좌석이나 컴팩트한 차 내부가 갇힌 느낌을 준다.",
+        "문이 잠겨서 즉시 나갈 수 없으면 공황이 생긴다.",
+        "탈의실이나 작은 화장실 칸이 심한 불편함을 준다.",
+        "갇힌 느낌을 피하기 위해 불을 켜거나 문을 열고 잔다.",
+        "움직일 수 없는 붐비는 버스나 지하철이 매우 불안하다.",
+        "공간에 들어가기 전에 모든 출구를 파악해야 한다.",
+        "낮은 천장 아래에 있으면 벽이 좁아오는 느낌이 든다.",
+        "생매장되는 생각이 극도의 공포를 준다.",
+        "목이나 가슴을 조이는 옷을 불편해한다.",
+        "담요나 침낭에 감싸이는 것이 불안을 유발할 수 있다.",
+        "동굴, 지하실, 지하 공간을 강하게 피한다.",
+        "안아주는 것조차 압도적으로 느껴질 때가 있다.",
+        "마스크나 안면 가리개가 숨을 못 쉬는 느낌을 준다.",
+        "방에 자리잡기 전에 창문과 문이 열리는지 확인한다."
+      ]
+    },
+    {
+      id: 'nature', name: '자연 & 동물', desc: '생물과 자연 현상에 대한 두려움',
+      questions: [
+        "곤충, 거미, 뱀을 보면 극도의 공포를 느낀다.",
+        "깊은 물, 절벽, 폭풍 근처의 야외에 있으면 매우 불안해진다.",
+        "크거나 예측 불가능한 동물이 심한 두려움을 준다.",
+        "거미나 다른 생물의 사진을 보기만 해도 불쾌하다.",
+        "천둥과 번개가 극도의 공황을 유발한다.",
+        "벌집이나 말벌 둥지 근처에 있다는 생각이 무섭다.",
+        "순해 보이는 개조차 매우 두렵다.",
+        "바닥이 보이지 않는 자연 수역에서 수영하는 것이 무섭다.",
+        "밤에 방 안에 나방이나 파리가 있으면 극도의 공포를 느낀다.",
+        "절벽이나 산 같은 자연 속 높이에서 얼어붙는다.",
+        "야생동물이 무서워 하이킹이나 야외 활동을 피한다.",
+        "바람 소리나 다가오는 폭풍 소리가 매우 불안하다.",
+        "새나 박쥐에게 공격받을까봐 두렵다.",
+        "특정 동물이 무서워 동물원을 편하게 방문하지 못한다.",
+        "땅 위의 지렁이나 민달팽이를 보면 강한 혐오 반응이 생긴다.",
+        "바다 근처나 바다 속에 있으면 위험하다는 느낌이 든다.",
+        "예상치 못하게 피부에 벌레가 닿으면 공황이 생긴다.",
+        "야간에 야생동물을 마주칠까봐 캠핑을 피한다.",
+        "포식자에 관한 자연 다큐멘터리를 보면 매우 불안해진다.",
+        "지진 같은 자연재해를 생각하면 공포가 든다."
+      ]
+    },
+    {
+      id: 'blood', name: '혈액 & 부상', desc: '피, 상처, 의료 시술에 대한 두려움',
+      questions: [
+        "피를 보는 것—화면에서조차—이 어지럽거나 메슥거리게 만든다.",
+        "주사나 수술 같은 의료 시술이 몹시 두렵다.",
+        "다른 사람의 상처나 부상을 보면 신체적 반응이 심하게 나타난다.",
+        "혈액이 채취된다는 생각만으로 어지러워진다.",
+        "부상 장면이 나오는 의료 프로그램이나 영화를 피한다.",
+        "주사기를 보는 것만으로 심장이 빨리 뛰고 손에 땀이 난다.",
+        "피를 보고 기절하거나 기절할 뻔한 적이 있다.",
+        "치과 치료가 일반적인 불편함을 넘어 극도의 불안을 준다.",
+        "사고나 수술에 관한 자세한 이야기를 들으면 메슥거린다.",
+        "부상 묘사가 포함된 뉴스 기사를 읽는 것을 피한다.",
+        "베이거나 멍이 들 수 있다는 생각이 과도한 두려움을 준다.",
+        "주변에서 다른 사람이 의료적 처치를 받을 때 몸이 긴장되거나 외면한다.",
+        "작은 종이에 베이는 것조차 공황을 유발할 수 있다.",
+        "헌혈 클리닉이나 의료 검사소를 강하게 피한다.",
+        "화면으로 수술 장면을 보면 몸이 실제로 불편해진다.",
+        "다른 사람이 신체적 고통을 자세히 묘사할 때 속이 불편해진다.",
+        "관련 시술이 두려워 의료 도움 받는 것을 미루게 된다.",
+        "붕대를 착용하면 그 아래 상처를 계속 의식하게 된다.",
+        "병원 냄새나 소독약 냄새가 강한 불안을 유발한다.",
+        "몸에 어떤 통증이 느껴지면 최악의 의료적 결과를 상상한다."
+      ]
+    },
+    {
+      id: 'darkness', name: '어둠 & 미지', desc: '어둠과 보이지 않는 것에 대한 두려움',
+      questions: [
+        "어둠 속에 혼자 있으면 공포나 강한 불안감이 생긴다.",
+        "밤에 이상한 소리가 나면 위험한 무언가가 가까이 있다고 확신하게 된다.",
+        "낯선 환경—특히 밤에—은 심한 불안을 유발한다.",
+        "미지의 것이나 불확실성에 대한 생각이 지속적인 공포를 불러일으킨다.",
+        "어둠이 무서워 불을 켜거나 TV를 켜놓고 잔다.",
+        "밤에 지하실이나 다락방에 혼자 가는 것을 피한다.",
+        "어두운 주차장에 혼자 차를 세우러 가는 것이 두렵다.",
+        "어둠 속에서 혼자 있으면 누군가가 나를 지켜보거나 따라오는 느낌이 든다.",
+        "밤에 정전이 되면 즉각적이고 강한 공황이 생긴다.",
+        "어둠 속의 그림자나 예상치 못한 형체에 얼어붙는다.",
+        "자기 전에 침대 아래나 옷장 안을 확인한다.",
+        "묘지, 폐건물, 어두운 골목을 지나는 것이 불안하다.",
+        "어둠 속에 뭔가 숨어 있다는 생각이 나를 마비시킨다.",
+        "밤에 방향감각을 잃고 잠에서 깨면 극도로 공포스럽다.",
+        "공포 콘텐츠를 피하는 이유는 어둠 속에서도 그 공포가 남기 때문이다.",
+        "어두워진 후 산책하러 나가는 것이 실질적인 위협처럼 느껴진다.",
+        "창문 없거나 자연광이 없는 방에 있으면 몹시 불안해진다.",
+        "어둠 속에서 길을 잃는다는 생각이 나의 가장 큰 공포 중 하나다.",
+        "주변을 명확히 볼 수 없을 때 위험 시나리오를 상상하게 된다.",
+        "어둠은 내가 환경에 대한 통제력을 잃은 것처럼 느끼게 만든다."
+      ]
+    }
+  ],
+  ja: [
+    {
+      id: 'social', name: '社会不安', desc: '判断や恥への恐怖',
+      questions: [
+        "集団の中で注目されることがとても不快に感じる。",
+        "できる限り、人前での発言や社交的な集まりを避けている。",
+        "見知らぬ人とアイコンタクトをとることに強い不安を感じる。",
+        "他人の前で恥をかかないか、過剰に心配してしまう。",
+        "社交的なイベントの後、会話を振り返って言ったことを後悔する。",
+        "知らない人と会話を始めたり続けたりすることが難しい。",
+        "一人でパーティに参加するという考えだけで恐怖を感じる。",
+        "人が大勢いる部屋に入るとき、強い自意識を感じる。",
+        "人に見られるかもしれないので、人前で食べたり飲んだりするのを避ける。",
+        "誰かに見られながら作業すると明らかに不安になる。",
+        "社交的な状況を避けるために招待を断ることが多い。",
+        "自分の不安を人が気づいて厳しく判断するのではないかと恐れる。",
+        "見知らぬ人に電話をかけることが大きなストレスになる。",
+        "会議やグループディスカッションで発言することが難しい。",
+        "会話の前に強迫的にリハーサルをする。",
+        "社交的な場面で顔が赤くなったり声が震えたりする。",
+        "公共の場で物を返品したり苦情を言ったりすることが耐えられない。",
+        "新しい人に紹介される可能性のある状況を避ける。",
+        "公共の場で写真を撮られたり撮影されたりすることがとても不安だ。",
+        "社交的な交流の後、疲れ果てて終わった安堵感を感じる。"
+      ]
+    },
+    {
+      id: 'agoraphobia', name: '広場恐怖症', desc: '広い場所や人混みへの恐怖',
+      questions: [
+        "市場や広場のような広くて混雑した場所でパニックや閉塞感を覚える。",
+        "家から遠く離れ、簡単に戻れないと思うと不安になる。",
+        "飛行機、電車、地下鉄の利用が大きな苦痛をもたらす。",
+        "建物に入るときは常に出口の近くにいようとする。",
+        "見知らぬ場所に一人で閉じ込められるという考えが恐ろしい。",
+        "何かあった場合が不安で、一人で旅行することを避ける。",
+        "広い野原や駐車場のような広い空間で無防備に感じる。",
+        "特定の慣れた場所でしか安全と感じられない。",
+        "混雑したショッピングモールやコンサート会場で強い不安が生じる。",
+        "外出するときは誰かに同行してもらわないと安心できない。",
+        "公共の場で倒れたとき、助けてくれる人がいないかもしれないという考えが怖い。",
+        "運転するとき橋、高架道路、高速道路を避けようとする。",
+        "長い列や待合室が閉じ込められた感じを与える。",
+        "パニック発作が起きるかもしれないので外出を避けたことがある。",
+        "病院や医療援助から遠く離れていると非常に不安になる。",
+        "知らない都市に一人で旅行することは圧倒的な不安を引き起こす。",
+        "素早く立ち去ることが難しい状況で不安になる。",
+        "避難場所のない広い景色が脅威に感じられる。",
+        "家から遠ざかるほど不安が増す。",
+        "外で何かが起きるかもしれないと思って予定をキャンセルすることがある。"
+      ]
+    },
+    {
+      id: 'claustrophobia', name: '閉所恐怖症', desc: '狭い空間への恐怖',
+      questions: [
+        "窓のない小さな部屋にいると、息が詰まるような感覚がある。",
+        "できる限り、エレベーター・トンネル・狭い通路を避けている。",
+        "体が囲まれていると感じると、強烈なパニックや恐怖が生じる。",
+        "MRI装置やスキャン機器が恐ろしい。",
+        "どんなに高い階でもエレベーターより階段を選ぶ。",
+        "トンネル内の渋滞が顕著な不安を引き起こす。",
+        "狭い飛行機の座席やコンパクトな車内が閉じ込められた感じを与える。",
+        "ドアが施錠されてすぐに出られないとパニックになる。",
+        "試着室や小さなトイレの個室が大きな不快感を与える。",
+        "閉じ込められた感覚を避けるために電気をつけたままドアを開けて寝る。",
+        "身動きが取れない混雑したバスや電車が非常に不安だ。",
+        "空間に入る前にすべての出口を確認する必要がある。",
+        "低い天井の下にいると壁が迫ってくる感じがする。",
+        "生き埋めにされることを想像すると極度の恐怖を感じる。",
+        "首や胸を締め付ける衣服が不快だ。",
+        "毛布や寝袋に包まれることが不安を引き起こすことがある。",
+        "洞窟、地下室、地下空間を強く避ける。",
+        "抱擁でさえ圧倒的に感じることがある。",
+        "マスクや顔を覆うものが息ができない感じをもたらす。",
+        "部屋に落ち着く前に窓とドアが開くか確認する。"
+      ]
+    },
+    {
+      id: 'nature', name: '自然・動物', desc: '生き物と自然現象への恐怖',
+      questions: [
+        "虫、クモ、ヘビを見ると極度の恐怖を感じる。",
+        "深い水・崖・嵐の近くにいることで強い不安を覚える。",
+        "大きくて予測不能な動物が深刻な恐怖を引き起こす。",
+        "クモや他の生き物の写真を見るだけで気分が悪くなる。",
+        "雷と稲妻が極度のパニックを引き起こす。",
+        "蜂の巣やスズメバチの巣の近くにいるという考えが恐ろしい。",
+        "おとなしく見える犬でさえ非常に怖い。",
+        "底が見えない自然の水域で泳ぐことが怖い。",
+        "夜に部屋の中に蛾や蚊がいると気づくと極度の恐怖を感じる。",
+        "崖や山などの自然の中の高さで固まってしまう。",
+        "野生動物が怖くてハイキングやアウトドア活動を避ける。",
+        "風の音や嵐が近づく音がとても不安だ。",
+        "鳥やコウモリに攻撃されることを恐れている。",
+        "特定の動物が怖くて動物園に気軽に行けない。",
+        "地面のミミズやナメクジを見ると強い嫌悪反応が起きる。",
+        "海の近くや海の中にいると危険を感じる。",
+        "予期せず皮膚に虫が触れるとパニックになる。",
+        "夜に野生動物に遭遇することを恐れてキャンプを避ける。",
+        "捕食者についての自然ドキュメンタリーを見ると非常に不安になる。",
+        "地震などの自然災害を考えると恐怖を感じる。"
+      ]
+    },
+    {
+      id: 'blood', name: '血液・負傷', desc: '血・傷・医療処置への恐怖',
+      questions: [
+        "血を見ること—画面上でも—がめまいや吐き気を引き起こす。",
+        "注射や手術などの医療処置が恐ろしい。",
+        "他人の傷や怪我を見ると、強い身体反応が現れる。",
+        "採血のことを考えるだけでめまいがする。",
+        "負傷シーンのある医療番組や映画を避ける。",
+        "注射器を見るだけで心臓がドキドキして手に汗をかく。",
+        "血を見て気絶したか、気絶しそうになったことがある。",
+        "歯科処置が通常の不快感を超えた極度の不安を与える。",
+        "事故や手術について詳しく聞くと気分が悪くなる。",
+        "負傷の描写を含むニュース記事を読むことを避ける。",
+        "切り傷や打撲傷ができるかもしれないという考えが過度の恐怖を与える。",
+        "近くで他の人が医療処置を受けていると体が緊張したり目をそらしたりする。",
+        "小さな紙の切り傷でさえパニックを引き起こすことがある。",
+        "献血クリニックや医療検査室を強く避ける。",
+        "画面で手術シーンを見ると体が実際に不調になる。",
+        "他の人が身体的な痛みを詳しく描写すると具合が悪くなる。",
+        "関連する処置が怖くて医療的な助けを求めるのを遅らせる。",
+        "包帯をしていると、その下の傷のことが気になり続ける。",
+        "病院の臭いや消毒剤の臭いが強い不安を引き起こす。",
+        "どんな痛みを感じても最悪の医療的結果を想像してしまう。"
+      ]
+    },
+    {
+      id: 'darkness', name: '暗闇・未知', desc: '暗さと見えないものへの恐怖',
+      questions: [
+        "暗闇の中に一人でいると恐怖や強い不安を感じる。",
+        "夜中に奇妙な音がすると、危険な何かが近くにいると確信してしまう。",
+        "見知らぬ環境—特に夜—では強い不安が生じる。",
+        "未知のものや不確実性を考えると、持続的な恐怖が押し寄せる。",
+        "暗闇が怖くて電気をつけたままかテレビをつけて寝る。",
+        "夜に地下室や屋根裏に一人で行くことを避ける。",
+        "暗い駐車場に一人で車を停めに行くことが怖い。",
+        "暗闇の中で一人でいると、誰かに見られたり追われたりする感じがする。",
+        "夜に停電になるとすぐに強いパニックが起きる。",
+        "暗闇の中の影や予期せぬ形に固まってしまう。",
+        "寝る前にベッドの下やクローゼットの中を確認する。",
+        "墓地、廃屋、暗い路地を通ることが不安だ。",
+        "暗闇の中に何か隠れているという考えが自分を麻痺させる。",
+        "夜中に方向感覚を失って目が覚めると極度に恐ろしい。",
+        "ホラーコンテンツを避ける理由は暗闇の中でも恐怖が残るからだ。",
+        "暗くなってから散歩に出ることが本当の脅威のように感じる。",
+        "窓のない、自然光のない部屋にいるとひどく不安になる。",
+        "暗闇の中で迷子になるという考えが最も大きな恐怖の一つだ。",
+        "周囲が明確に見えないとき、危険なシナリオを想像してしまう。",
+        "暗闇は環境のコントロールを失ったように感じさせる。"
+      ]
+    }
+  ]
+};
+
+/* ── STATE ── */
+let lang = 'en';
+let selectedPhobia = null;
+let answers = new Array(20).fill(null);
+let current = 0;
+
+function t(key) { return I18N[lang][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  refreshI18n();
+  const testActive = document.getElementById('screen-test').classList.contains('active');
+  if (testActive) renderQuestion();
+  const selActive = document.getElementById('screen-select').classList.contains('active');
+  if (selActive) renderSelectGrid();
+}
+
+function refreshI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key === 'intro.title' || key === 'select.title') {
+      el.innerHTML = t(key).replace('\n','<br>');
+    } else {
+      el.textContent = t(key);
+    }
+  });
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function goIntro() { playClick(); stopMusic(); showScreen('intro'); refreshI18n(); }
+function goSelect() { playClick(); showScreen('select'); renderSelectGrid(); }
+
+function renderSelectGrid() {
+  const grid = document.getElementById('select-grid');
+  const phobias = PHOBIAS[lang];
+  grid.innerHTML = '';
+  phobias.forEach((p, i) => {
+    const card = document.createElement('button');
+    card.className = 'phobia-card' + (selectedPhobia === p.id ? ' selected' : '');
+    card.innerHTML = `<span class="card-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="card-name">${p.name}</span>
+      <span class="card-desc">${p.desc}</span>`;
+    card.onclick = () => { playClick(); selectedPhobia = p.id; startTest(); };
+    grid.appendChild(card);
+  });
+}
+
+function startTest() {
+  answers = new Array(20).fill(null);
+  current = 0;
+  showScreen('test');
+  renderQuestion();
+  startMusic();
+}
+
+/* ── TYPING ── */
+let typingTimer = null;
+
+function typeText(el, text, onDone) {
+  if (typingTimer) { clearInterval(typingTimer); typingTimer = null; }
+  el.textContent = '';
+  let i = 0;
+  typingTimer = setInterval(() => {
+    if (i >= text.length) {
+      clearInterval(typingTimer); typingTimer = null;
+      if (onDone) onDone();
+      return;
+    }
+    el.textContent += text[i];
+    playTypeSound();
+    i++;
+  }, 28);
+}
+
+function renderQuestion(skipType) {
+  const phobias = PHOBIAS[lang];
+  const phobia = phobias.find(p => p.id === selectedPhobia) || phobias[0];
+  const q = phobia.questions[current];
+  const opts = t('options');
+  const total = phobia.questions.length;
+  const pct = Math.round((current / total) * 100);
+
+  document.getElementById('test-phobia-name').textContent = phobia.name;
+  document.getElementById('prog-num').textContent = (current + 1) + ' / ' + total;
+  document.getElementById('prog-fill').style.width = Math.max(pct, 3) + '%';
+  document.getElementById('q-num').textContent = String(current + 1).padStart(2, '0');
+
+  const qtext = document.getElementById('q-text');
+  const optDiv = document.getElementById('q-options');
+  optDiv.innerHTML = '';
+  optDiv.style.opacity = '0';
+
+  const renderOpts = () => {
+    optDiv.innerHTML = '';
+    opts.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn' + (answers[current] === i ? ' selected' : '');
+      btn.innerHTML = `<span class="opt-label">${String.fromCharCode(65+i)}</span><span>${opt}</span>`;
+      btn.onclick = () => { playClick(); answers[current] = i; renderQuestion(true); };
+      optDiv.appendChild(btn);
+    });
+    optDiv.style.transition = 'opacity 0.3s ease';
+    optDiv.style.opacity = '1';
+  };
+
+  const qBlock = document.getElementById('q-block');
+  qBlock.classList.remove('fade-in');
+  void qBlock.offsetWidth;
+  qBlock.classList.add('fade-in');
+
+  if (skipType) {
+    qtext.textContent = q;
+    renderOpts();
+  } else {
+    qtext.textContent = '';
+    typeText(qtext, q, renderOpts);
+  }
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  const btnNext = document.getElementById('btn-next');
+  if (current === total - 1) {
+    btnNext.textContent = t('test.finish');
+  } else {
+    btnNext.textContent = t('test.next');
+  }
+}
+
+function prevQ() {
+  if (current > 0) { playClick(); current--; renderQuestion(); }
+}
+
+function nextQ() {
+  const phobia = PHOBIAS[lang].find(p => p.id === selectedPhobia);
+  const total = phobia ? phobia.questions.length : 20;
+  if (answers[current] === null) {
+    document.getElementById('q-text').style.color = '#c00';
+    setTimeout(() => document.getElementById('q-text').style.color = '', 600);
+    return;
+  }
+  playClick();
+  if (current < total - 1) { current++; renderQuestion(); }
+  else showResult();
+}
+
+function showResult() {
+  const total = answers.reduce((a, b) => a + (b || 0), 0);
+  const maxTotal = 20 * 4;
+  const pct = Math.round((total / maxTotal) * 100);
+  const levels = t('result.levels');
+  const descs = t('result.descs');
+  const lvlIdx = pct < 15 ? 0 : pct < 30 ? 1 : pct < 50 ? 2 : pct < 70 ? 3 : 4;
+
+  const phobia = PHOBIAS[lang].find(p => p.id === selectedPhobia);
+
+  document.getElementById('res-phobia-tag').textContent = phobia ? phobia.name : '';
+  document.getElementById('res-score').textContent = pct + '%';
+  document.getElementById('res-level').textContent = levels[lvlIdx];
+  document.getElementById('res-desc').textContent = descs[lvlIdx];
+
+  /* sub-scores: split 20 questions into 4 groups of 5 */
+  const subLabels = {
+    en: ['Avoidance', 'Physical reaction', 'Cognitive impact', 'Daily interference'],
+    ko: ['회피 행동', '신체 반응', '인지적 영향', '일상 간섭'],
+    ja: ['回避行動', '身体反応', '認知への影響', '日常への干渉']
+  };
+  const groups = [
+    answers.slice(0, 5),
+    answers.slice(5, 10),
+    answers.slice(10, 15),
+    answers.slice(15, 20)
+  ];
+  const groupPcts = groups.map(g => Math.round(g.reduce((a, b) => a + (b || 0), 0) / (5 * 4) * 100));
+  const topIdx = groupPcts.indexOf(Math.max(...groupPcts));
+  const labels = subLabels[lang];
+
+  const barsDiv = document.getElementById('result-bars');
+  barsDiv.innerHTML = '';
+  groupPcts.forEach((p, i) => {
+    const isTop = i === topIdx;
+    barsDiv.innerHTML += `
+      <div class="bar-row${isTop ? ' top-phobia' : ''}">
+        <div class="bar-label">${labels[i]}${isTop ? `<span class="top-badge">#1</span>` : ''}</div>
+        <div class="bar-track"><div class="bar-track-fill" style="width:0%" id="bar-${i}"></div></div>
+        <div class="bar-pct">${p}%</div>
+      </div>`;
+  });
+
+  showScreen('result');
+  setTimeout(() => {
+    groupPcts.forEach((p, i) => {
+      const el = document.getElementById('bar-' + i);
+      if (el) el.style.width = p + '%';
+    });
+  }, 150);
+}
+
+function retakeSame() {
+  playClick();
+  answers = new Array(20).fill(null);
+  current = 0;
+  showScreen('test');
+  renderQuestion();
+}
+
+/* ── SYNTH ENGINE ── */
+let audioCtx = null;
+let masterGain = null;
+let musicPlaying = false;
+let musicNodes = [];
+let padTimeouts = [];
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.connect(audioCtx.destination);
+}
+
+let sfxCtx = null;
+function getSfxCtx() {
+  if (!sfxCtx || sfxCtx.state === 'closed') sfxCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (sfxCtx.state === 'suspended') sfxCtx.resume();
+  return sfxCtx;
+}
+
+function playClick() {
+  try {
+    const ctx = getSfxCtx();
+    const now = ctx.currentTime;
+    const buf = ctx.createBuffer(1, ctx.sampleRate * 0.06, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.008));
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.28, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 1800;
+    src.connect(hp); hp.connect(g); g.connect(ctx.destination);
+    src.start(now);
+  } catch(e) {}
+}
+
+function playTypeSound() {
+  try {
+    const ctx = getSfxCtx();
+    const now = ctx.currentTime;
+    const freq = 2200 + (Math.random() - 0.5) * 600;
+    const dur = 0.022;
+    const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * dur), ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) {
+      const t2 = i / ctx.sampleRate;
+      d[i] = Math.sin(2 * Math.PI * freq * t2) * Math.exp(-t2 / 0.006)
+            + (Math.random() * 2 - 1) * 0.3 * Math.exp(-t2 / 0.003);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.07, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    src.connect(g); g.connect(ctx.destination);
+    src.start(now);
+  } catch(e) {}
+}
+
+function createReverb(ctx) {
+  const conv = ctx.createConvolver();
+  const len = ctx.sampleRate * 3.5;
+  const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.2);
+  }
+  conv.buffer = buf; return conv;
+}
+
+function createPad(freq, detune, type) {
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator(), osc2 = ctx.createOscillator();
+  const gainNode = ctx.createGain(), filter = ctx.createBiquadFilter();
+  osc.type = type || 'sine'; osc.frequency.value = freq; osc.detune.value = detune || 0;
+  osc2.type = 'triangle'; osc2.frequency.value = freq * 1.002; osc2.detune.value = (detune || 0) + 7;
+  filter.type = 'lowpass'; filter.frequency.value = 900; filter.Q.value = 0.8;
+  const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+  lfo.frequency.value = 0.08 + Math.random() * 0.04; lfoGain.gain.value = 6;
+  lfo.connect(lfoGain); lfoGain.connect(osc.detune); lfo.start();
+  osc.connect(gainNode); osc2.connect(gainNode); gainNode.connect(filter);
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.12, ctx.currentTime + 3.5);
+  filter.connect(masterGain); osc.start(); osc2.start();
+  musicNodes.push(osc, osc2, lfo);
+}
+
+function createDrone(freq) {
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator(), gainNode = ctx.createGain(), filter = ctx.createBiquadFilter();
+  osc.type = 'sawtooth'; osc.frequency.value = freq;
+  filter.type = 'lowpass'; filter.frequency.value = 300; filter.Q.value = 2;
+  const lfo = ctx.createOscillator(), lfoGain = ctx.createGain();
+  lfo.frequency.value = 0.03; lfoGain.gain.value = freq * 0.002;
+  lfo.connect(lfoGain); lfoGain.connect(osc.frequency); lfo.start();
+  osc.connect(gainNode); gainNode.connect(filter); filter.connect(masterGain);
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 5);
+  osc.start(); musicNodes.push(osc, lfo);
+}
+
+function scheduleArpNote(freq, startTime, dur) {
+  const ctx = audioCtx;
+  const osc = ctx.createOscillator(), gainNode = ctx.createGain(), filter = ctx.createBiquadFilter();
+  osc.type = 'triangle'; osc.frequency.value = freq;
+  filter.type = 'bandpass'; filter.frequency.value = freq * 2; filter.Q.value = 1.5;
+  osc.connect(gainNode); gainNode.connect(filter); filter.connect(masterGain);
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(0.055, startTime + 0.08);
+  gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+  osc.start(startTime); osc.stop(startTime + dur + 0.1);
+}
+
+function startArpLoop() {
+  if (!musicPlaying) return;
+  const ctx = audioCtx, now = ctx.currentTime;
+  const scale = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
+  const pattern = [0, 2, 4, 6, 4, 2, 1, 3];
+  const stepDur = 60 / 38 / 2;
+  pattern.forEach((deg, i) => scheduleArpNote(scale[deg % scale.length] * (i < 4 ? 0.5 : 1), now + i * stepDur, stepDur * 1.6));
+  padTimeouts.push(setTimeout(startArpLoop, pattern.length * stepDur * 1000));
+}
+
+function startMusic() {
+  if (musicPlaying) return;
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  musicPlaying = true;
+  const reverb = createReverb(audioCtx);
+  reverb.connect(audioCtx.destination);
+  const reverbGain = audioCtx.createGain();
+  reverbGain.gain.value = 0.45; reverbGain.connect(reverb);
+  masterGain.connect(reverbGain);
+  masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.72, audioCtx.currentTime + 4);
+  createPad(130.81, 0, 'sine'); createPad(196.00, -5, 'sine');
+  createPad(246.94, 8, 'triangle'); createPad(164.81, 3, 'sine');
+  createDrone(65.41);
+  padTimeouts.push(setTimeout(startArpLoop, 3000));
+}
+
+function stopMusic() {
+  if (!musicPlaying) return;
+  musicPlaying = false;
+  padTimeouts.forEach(t => clearTimeout(t)); padTimeouts = [];
+  if (masterGain) {
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+  }
+  setTimeout(() => {
+    musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+    musicNodes = [];
+    if (audioCtx) { audioCtx.close(); audioCtx = null; masterGain = null; }
+  }, 1600);
+}
+
+refreshI18n();
+</script>
+</body>
+</html>
