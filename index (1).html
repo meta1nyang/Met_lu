@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookCraft — 나만의 디지털 책 만들기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ── 토큰 ── */
+    :root {
+      --navy:   #1B2A4A;
+      --cream:  #FAF7F2;
+      --gold:   #D4A853;
+      --gold-lt:#F0D89A;
+      --ink:    #2C2C2C;
+      --ink-lt: #5A5A5A;
+      --page:   #FFFEF9;
+      --border: #E2D9C8;
+      --red:    #C0392B;
+      --shadow: rgba(27,42,74,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── 네비 ── */
+    nav {
+      background: var(--navy);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--gold);
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+    }
+    .nav-logo span { color: #fff; font-style: italic; }
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn {
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.45rem 1rem;
+      transition: all 0.18s;
+    }
+    .btn-ghost {
+      background: transparent;
+      color: rgba(255,255,255,0.75);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 600;
+    }
+    .btn-gold:hover { background: var(--gold-lt); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,168,83,0.35); }
+
+    /* ── 앱 레이아웃 ── */
+    .app {
+      display: grid;
+      grid-template-columns: 280px 1fr 300px;
+      height: calc(100vh - 60px);
+      overflow: hidden;
+    }
+
+    /* ── 사이드패널 공통 ── */
+    .panel {
+      background: var(--page);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 1rem 1.25rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--navy);
+      color: #fff;
+    }
+    .panel-header h3 {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .panel-body { flex: 1; overflow-y: auto; padding: 1rem; }
+
+    /* ── 왼쪽: 목차 패널 ── */
+    .toc-panel { grid-column: 1; }
+    .toc-meta { margin-bottom: 1.25rem; }
+    .toc-meta input, .toc-meta textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.55rem 0.75rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.82rem;
+      background: var(--cream);
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+      transition: border-color 0.18s;
+    }
+    .toc-meta input:focus, .toc-meta textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .toc-meta textarea { height: 64px; resize: none; }
+    .label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--ink-lt);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.3rem;
+    }
+
+    /* 챕터 목록 */
+    .chapter-list { list-style: none; }
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .chapter-item:hover { background: var(--cream); border-color: var(--border); }
+    .chapter-item.active {
+      background: var(--navy);
+      color: #fff;
+      border-color: var(--navy);
+    }
+    .chapter-item.active .chapter-num { color: var(--gold); }
+    .chapter-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      min-width: 24px;
+    }
+    .chapter-title-text { flex: 1; font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chapter-del {
+      opacity: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #e74c3c;
+      font-size: 0.9rem;
+      transition: opacity 0.15s;
+      padding: 2px;
+    }
+    .chapter-item:hover .chapter-del { opacity: 1; }
+
+    .btn-add-chapter {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 0.6rem;
+      background: transparent;
+      border: 2px dashed var(--border);
+      border-radius: 7px;
+      color: var(--ink-lt);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .btn-add-chapter:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212,168,83,0.06);
+    }
+
+    /* ── 중앙: 에디터 ── */
+    .editor-area {
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      background: #E8E0D4;
+      overflow: hidden;
+      position: relative;
+    }
+    .editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.6rem 1rem;
+      background: var(--page);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .toolbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 0.25rem;
+    }
+    .tool-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      padding: 0.35rem 0.55rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      color: var(--ink);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .tool-btn:hover { background: var(--cream); border-color: var(--border); }
+    .tool-btn.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .tool-btn b { font-weight: 700; }
+
+    .editor-scroll {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2.5rem 1.5rem;
+    }
+
+    /* 책 페이지 */
+    .book-page {
+      width: 100%;
+      max-width: 680px;
+      min-height: 880px;
+      background: var(--page);
+      border-radius: 2px 8px 8px 2px;
+      box-shadow:
+        -6px 0 20px rgba(0,0,0,0.08),
+        6px 6px 24px rgba(0,0,0,0.15),
+        inset -2px 0 8px rgba(0,0,0,0.04);
+      padding: 3.5rem 4rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .book-page::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 28px;
+      background: linear-gradient(to right, #E0D6C8, var(--page));
+      border-radius: 2px 0 0 2px;
+    }
+
+    .chapter-heading-input {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--navy);
+      border: none;
+      outline: none;
+      width: 100%;
+      background: transparent;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--gold);
+      margin-bottom: 2rem;
+      line-height: 1.3;
+    }
+    .chapter-heading-input::placeholder { color: var(--border); }
+
+    .chapter-body-input {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 1rem;
+      line-height: 2;
+      color: var(--ink);
+      border: none;
+      outline: none;
+      width: 100%;
+      flex: 1;
+      background: transparent;
+      resize: none;
+      min-height: 600px;
+    }
+    .chapter-body-input::placeholder { color: #C8BEA8; font-style: italic; }
+
+    .page-number {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.78rem;
+      color: var(--ink-lt);
+      margin-top: 2rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── 오른쪽: 미리보기/공유 패널 ── */
+    .preview-panel {
+      grid-column: 3;
+      border-left: 1px solid var(--border);
+      border-right: none;
+    }
+
+    .cover-preview {
+      background: var(--navy);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .cover-preview:hover { transform: scale(1.02); }
+    .cover-preview::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(212,168,83,0.15) 0%, transparent 60%);
+    }
+    .cover-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: #fff;
+      font-weight: 700;
+      line-height: 1.4;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .cover-author {
+      font-family: 'Noto Serif KR', serif;
+      font-size: 0.78rem;
+      color: var(--gold);
+      position: relative;
+    }
+    .cover-spine {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 10px;
+      background: var(--gold);
+    }
+    .cover-lines {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .cover-lines span {
+      display: block;
+      height: 1px;
+      background: rgba(255,255,255,0.15);
+    }
+    .cover-lines span:nth-child(1) { width: 40px; }
+    .cover-lines span:nth-child(2) { width: 28px; }
+    .cover-lines span:nth-child(3) { width: 18px; }
+
+    /* 공유 섹션 */
+    .share-section { margin-bottom: 1.25rem; }
+    .share-section h4 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--ink-lt);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.6rem;
+    }
+    .share-link-box {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .share-link-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.65rem;
+      font-size: 0.75rem;
+      color: var(--ink-lt);
+      background: var(--cream);
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-copy {
+      background: var(--gold);
+      color: var(--navy);
+      border: none;
+      border-radius: 6px;
+      padding: 0 0.75rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.18s;
+      white-space: nowrap;
+    }
+    .btn-copy:hover { background: var(--gold-lt); }
+    .btn-copy.copied { background: #27ae60; color: #fff; }
+
+    .export-btns { display: flex; flex-direction: column; gap: 0.5rem; }
+    .btn-export {
+      width: 100%;
+      padding: 0.65rem 1rem;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1px solid transparent;
+    }
+    .btn-export-primary {
+      background: var(--navy);
+      color: #fff;
+    }
+    .btn-export-primary:hover { background: #243860; transform: translateY(-1px); }
+    .btn-export-outline {
+      background: transparent;
+      color: var(--navy);
+      border-color: var(--navy);
+    }
+    .btn-export-outline:hover { background: var(--navy); color: #fff; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .stat-card {
+      background: var(--cream);
+      border-radius: 7px;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--border);
+    }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--navy);
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--ink-lt);
+      margin-top: 0.1rem;
+    }
+
+    /* 모달 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(27,42,74,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--page);
+      border-radius: 14px;
+      padding: 2.5rem;
+      width: 90%;
+      max-width: 540px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+      transform: translateY(20px);
+      transition: transform 0.25s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--navy);
+      margin-bottom: 0.25rem;
+    }
+    .modal p { color: var(--ink-lt); font-size: 0.88rem; margin-bottom: 1.5rem; }
+    .modal-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 0.88rem;
+      margin-bottom: 1rem;
+      background: var(--cream);
+      color: var(--ink);
+      transition: border-color 0.18s;
+    }
+    .modal-input:focus { outline: none; border-color: var(--gold); }
+    .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+    .btn-modal-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--ink-lt);
+      padding: 0.55rem 1.25rem;
+      border-radius: 7px;
+      font-family: 'Noto Sans KR', sans-serif;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-modal-cancel:hover { border-color: var(--ink); color: var(--ink); }
+    .btn-modal-ok {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 0.55rem 1.5rem;
+      border-radius: 7px;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-modal-ok:hover { background: #243860; }
+
+    /* 토스트 */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--navy);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 300;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast .toast-icon { color: var(--gold); }
+
+    /* 스크롤바 */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+    /* 빈 상태 */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--ink-lt);
+      text-align: center;
+      padding: 2rem;
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+    .empty-state p { font-size: 0.88rem; line-height: 1.6; }
+
+    /* 반응형 */
+    @media (max-width: 960px) {
+      .app { grid-template-columns: 240px 1fr; }
+      .preview-panel { display: none; }
+    }
+    @media (max-width: 640px) {
+      .app { grid-template-columns: 1fr; }
+      .toc-panel { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 네비게이션 -->
+<nav>
+  <div class="nav-logo">Book<span>Craft</span></div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="loadDemo()">📖 예시 불러오기</button>
+    <button class="btn btn-ghost" onclick="saveBook()">💾 저장</button>
+    <button class="btn btn-gold" onclick="openShareModal()">🔗 공유 링크 생성</button>
+  </div>
+</nav>
+
+<!-- 메인 앱 -->
+<div class="app">
+
+  <!-- 왼쪽: 목차 -->
+  <aside class="panel toc-panel">
+    <div class="panel-header">
+      <h3>📚 책 정보 & 목차</h3>
+    </div>
+    <div class="panel-body">
+      <div class="toc-meta">
+        <label class="label">책 제목</label>
+        <input id="bookTitle" type="text" placeholder="나의 첫 번째 책" oninput="updatePreview()" />
+        <label class="label">저자</label>
+        <input id="bookAuthor" type="text" placeholder="홍길동" oninput="updatePreview()" />
+        <label class="label">책 소개</label>
+        <textarea id="bookDesc" placeholder="이 책에 대한 간단한 소개를 입력하세요..." oninput="updatePreview()"></textarea>
+      </div>
+
+      <label class="label">챕터 목록</label>
+      <ul class="chapter-list" id="chapterList"></ul>
+      <button class="btn-add-chapter" onclick="addChapter()">+ 챕터 추가</button>
+    </div>
+  </aside>
+
+  <!-- 중앙: 에디터 -->
+  <main class="editor-area">
+    <div class="editor-toolbar">
+      <button class="tool-btn" onclick="formatText('bold')" title="굵게"><b>B</b></button>
+      <button class="tool-btn" onclick="formatText('italic')" title="기울임"><i>I</i></button>
+      <button class="tool-btn" onclick="formatText('underline')" title="밑줄"><u>U</u></button>
+      <div class="toolbar-sep"></div>
+      <button class="tool-btn" onclick="insertTemplate('quote')" title="인용구">❝ 인용</button>
+      <button class="tool-btn" onclick="insertTemplate('divider')" title="구분선">— 구분선</button>
+      <button class="tool-btn" onclick="insertTemplate('note')" title="메모">📌 메모</button>
+      <div class="toolbar-sep"></div>
+      <span style="font-size:0.78rem;color:var(--ink-lt);margin-left:auto;" id="wordCount">0 글자</span>
+    </div>
+    <div class="editor-scroll">
+      <div class="book-page" id="bookPage">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">📖</div>
+          <p>왼쪽에서 챕터를 선택하거나<br/><strong>새 챕터를 추가</strong>해서 글쓰기를 시작하세요</p>
+        </div>
+        <div id="editorContent" style="display:none; flex-direction:column; flex:1;">
+          <input class="chapter-heading-input" id="chapterTitle" placeholder="챕터 제목을 입력하세요" oninput="onChapterInput()" />
+          <textarea class="chapter-body-input" id="chapterBody" placeholder="여기에 글을 써보세요... 좋은 이야기는 한 글자에서 시작됩니다." oninput="onChapterInput()"></textarea>
+          <div class="page-number" id="pageNum">— 1 —</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 오른쪽: 미리보기 & 공유 -->
+  <aside class="panel preview-panel">
+    <div class="panel-header">
+      <h3>🌟 미리보기 & 공유</h3>
+    </div>
+    <div class="panel-body">
+
+      <!-- 표지 미리보기 -->
+      <div class="cover-preview" onclick="openShareModal()">
+        <div class="cover-spine"></div>
+        <div class="cover-title" id="previewTitle">나의 첫 번째 책</div>
+        <div class="cover-author" id="previewAuthor">저자: 홍길동</div>
+        <div class="cover-lines">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <!-- 통계 -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statChapters">0</div>
+          <div class="stat-label">챕터</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statWords">0</div>
+          <div class="stat-label">글자 수</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPages">0</div>
+          <div class="stat-label">예상 페이지</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statTime">0분</div>
+          <div class="stat-label">읽기 시간</div>
+        </div>
+      </div>
+
+      <!-- 공유 링크 -->
+      <div class="share-section">
+        <h4>🔗 공유 링크</h4>
+        <div class="share-link-box">
+          <input class="share-link-input" id="shareLink" readonly value="링크를 생성하려면 '공유 링크 생성'을 클릭하세요" />
+          <button class="btn-copy" id="copyBtn" onclick="copyLink()">복사</button>
+        </div>
+      </div>
+
+      <!-- 내보내기 -->
+      <div class="share-section">
+        <h4>💾 내보내기</h4>
+        <div class="export-btns">
+          <button class="btn-export btn-export-primary" onclick="exportHTML()">
+            <span>🌐</span> HTML 파일로 저장
+          </button>
+          <button class="btn-export btn-export-outline" onclick="exportJSON()">
+            <span>📦</span> JSON 백업
+          </button>
+          <button class="btn-export btn-export-outline" onclick="importJSON()">
+            <span>📂</span> JSON 불러오기
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+</div>
+
+<!-- 공유 모달 -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <h2>🔗 공유 링크 생성</h2>
+    <p>책 내용이 URL에 인코딩되어 누구나 링크로 읽을 수 있습니다.</p>
+    <label class="label">생성된 공유 링크</label>
+    <input class="modal-input" id="modalShareLink" readonly style="font-family:monospace;font-size:0.8rem;" />
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeModal()">닫기</button>
+      <button class="btn-modal-ok" onclick="copyModalLink()">📋 링크 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toastMsg">복사되었습니다!</span>
+</div>
+
+<!-- 숨긴 파일 인풋 -->
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)" />
+
+<script>
+  // ── 앱 상태 ──
+  let state = {
+    chapters: [],
+    activeIdx: null,
+    title: '',
+    author: '',
+    desc: ''
+  };
+
+  // ── 초기화 ──
+  function init() {
+    const saved = localStorage.getItem('bookcraft_data');
+    if (saved) {
+      try { state = JSON.parse(saved); } catch(e) {}
+    }
+    // URL에서 책 데이터 복원
+    const hash = location.hash.slice(1);
+    if (hash) {
+      try {
+        const decoded = JSON.parse(decodeURIComponent(atob(hash)));
+        state = decoded;
+        showToast('📖 공유된 책을 불러왔습니다!');
+      } catch(e) {}
+    }
+    document.getElementById('bookTitle').value = state.title || '';
+    document.getElementById('bookAuthor').value = state.author || '';
+    document.getElementById('bookDesc').value = state.desc || '';
+    renderChapterList();
+    updatePreview();
+    if (state.activeIdx !== null && state.chapters[state.activeIdx]) {
+      selectChapter(state.activeIdx);
+    }
+  }
+
+  // ── 저장 ──
+  function saveBook() {
+    syncCurrentChapter();
+    state.title = document.getElementById('bookTitle').value;
+    state.author = document.getElementById('bookAuthor').value;
+    state.desc = document.getElementById('bookDesc').value;
+    localStorage.setItem('bookcraft_data', JSON.stringify(state));
+    showToast('💾 저장되었습니다!');
+  }
+
+  // ── 챕터 추가 ──
+  function addChapter() {
+    syncCurrentChapter();
+    const idx = state.chapters.length;
+    state.chapters.push({ title: `챕터 ${idx + 1}`, body: '' });
+    renderChapterList();
+    selectChapter(idx);
+    saveBook();
+  }
+
+  // ── 챕터 삭제 ──
+  function deleteChapter(idx) {
+    if (!confirm('이 챕터를 삭제할까요?')) return;
+    state.chapters.splice(idx, 1);
+    if (state.activeIdx === idx) {
+      state.activeIdx = null;
+      showEditor(false);
+    } else if (state.activeIdx > idx) {
+      state.activeIdx--;
+    }
+    renderChapterList();
+    updatePreview();
+    saveBook();
+  }
+
+  // ── 챕터 선택 ──
+  function selectChapter(idx) {
+    syncCurrentChapter();
+    state.activeIdx = idx;
+    const ch = state.chapters[idx];
+    document.getElementById('chapterTitle').value = ch.title;
+    document.getElementById('chapterBody').value = ch.body;
+    document.getElementById('pageNum').textContent = `— ${idx + 1} —`;
+    showEditor(true);
+    renderChapterList();
+    updateWordCount();
+  }
+
+  function showEditor(show) {
+    document.getElementById('emptyState').style.display = show ? 'none' : 'flex';
+    document.getElementById('editorContent').style.display = show ? 'flex' : 'none';
+  }
+
+  // ── 현재 챕터 동기화 ──
+  function syncCurrentChapter() {
+    if (state.activeIdx === null) return;
+    const ch = state.chapters[state.activeIdx];
+    if (!ch) return;
+    ch.title = document.getElementById('chapterTitle').value;
+    ch.body = document.getElementById('chapterBody').value;
+  }
+
+  function onChapterInput() {
+    if (state.activeIdx === null) return;
+    syncCurrentChapter();
+    // 제목이 바뀌면 목록도 업데이트
+    const titleEl = document.querySelector(`.chapter-item[data-idx="${state.activeIdx}"] .chapter-title-text`);
+    if (titleEl) titleEl.textContent = document.getElementById('chapterTitle').value || '제목 없음';
+    updateWordCount();
+    updatePreview();
+  }
+
+  // ── 챕터 목록 렌더 ──
+  function renderChapterList() {
+    const ul = document.getElementById('chapterList');
+    ul.innerHTML = '';
+    state.chapters.forEach((ch, i) => {
+      const li = document.createElement('li');
+      li.className = 'chapter-item' + (i === state.activeIdx ? ' active' : '');
+      li.dataset.idx = i;
+      li.onclick = () => selectChapter(i);
+      li.innerHTML = `
+        <span class="chapter-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="chapter-title-text">${ch.title || '제목 없음'}</span>
+        <button class="chapter-del" onclick="event.stopPropagation();deleteChapter(${i})" title="삭제">✕</button>
+      `;
+      ul.appendChild(li);
+    });
+  }
+
+  // ── 미리보기 업데이트 ──
+  function updatePreview() {
+    const title = document.getElementById('bookTitle').value || '나의 첫 번째 책';
+    const author = document.getElementById('bookAuthor').value || '홍길동';
+    state.title = title;
+    state.author = author;
+    state.desc = document.getElementById('bookDesc').value;
+
+    document.getElementById('previewTitle').textContent = title;
+    document.getElementById('previewAuthor').textContent = `저자: ${author}`;
+
+    const chapCount = state.chapters.length;
+    const totalChars = state.chapters.reduce((s, c) => s + (c.body ? c.body.length : 0), 0);
+    const pages = Math.max(1, Math.ceil(totalChars / 600));
+    const readTime = Math.max(1, Math.ceil(totalChars / 500));
+
+    document.getElementById('statChapters').textContent = chapCount;
+    document.getElementById('statWords').textContent = totalChars.toLocaleString();
+    document.getElementById('statPages').textContent = pages;
+    document.getElementById('statTime').textContent = readTime + '분';
+  }
+
+  // ── 글자 수 ──
+  function updateWordCount() {
+    const body = document.getElementById('chapterBody').value;
+    document.getElementById('wordCount').textContent = body.length.toLocaleString() + ' 글자';
+  }
+
+  // ── 서식 ──
+  function formatText(cmd) {
+    const ta = document.getElementById('chapterBody');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const sel = ta.value.substring(start, end);
+    if (!sel) return;
+    const map = { bold: `**${sel}**`, italic: `*${sel}*`, underline: `__${sel}__` };
+    const rep = map[cmd];
+    ta.setRangeText(rep, start, end, 'end');
+    onChapterInput();
+  }
+
+  function insertTemplate(type) {
+    const ta = document.getElementById('chapterBody');
+    const pos = ta.selectionStart;
+    const templates = {
+      quote: '\n\n> "인용구를 입력하세요"\n> — 출처\n\n',
+      divider: '\n\n────────────────────\n\n',
+      note: '\n\n📌 [메모: 여기에 메모를 입력하세요]\n\n'
+    };
+    const ins = templates[type];
+    ta.setRangeText(ins, pos, pos, 'end');
+    onChapterInput();
+  }
+
+  // ── 공유 링크 생성 ──
+  function generateShareLink() {
+    syncCurrentChapter();
+    const data = JSON.stringify(state);
+    const encoded = btoa(encodeURIComponent(data));
+    const link = `${location.origin}${location.pathname}#${encoded}`;
+    return link;
+  }
+
+  function openShareModal() {
+    const link = generateShareLink();
+    document.getElementById('shareLink').value = link;
+    document.getElementById('modalShareLink').value = link;
+    document.getElementById('shareModal').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('shareModal').classList.remove('open');
+  }
+
+  function copyLink() {
+    const link = generateShareLink();
+    navigator.clipboard.writeText(link).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✓ 복사됨';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 2000);
+      showToast('🔗 링크가 복사되었습니다!');
+    });
+  }
+
+  function copyModalLink() {
+    const link = document.getElementById('modalShareLink').value;
+    navigator.clipboard.writeText(link).then(() => {
+      showToast('🔗 링크가 클립보드에 복사되었습니다!');
+      closeModal();
+    });
+  }
+
+  // ── HTML 내보내기 ──
+  function exportHTML() {
+    syncCurrentChapter();
+    const title = state.title || '나의 책';
+    const author = state.author || '';
+    const chapters = state.chapters;
+
+    const chaptersHTML = chapters.map((ch, i) => `
+      <section class="chapter" id="ch${i+1}">
+        <h2>${escHtml(ch.title)}</h2>
+        <div class="body">${escHtml(ch.body || '').replace(/\n/g, '<br/>')}</div>
+      </section>
+    `).join('');
+
+    const tocHTML = chapters.map((ch, i) =>
+      `<li><a href="#ch${i+1}"><span>${String(i+1).padStart(2,'0')}</span>${escHtml(ch.title)}</a></li>`
+    ).join('');
+
+    const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>${escHtml(title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Serif KR',serif;background:#FAF7F2;color:#2C2C2C;min-height:100vh}
+header{background:#1B2A4A;color:#fff;padding:4rem 2rem 3rem;text-align:center}
+header h1{font-family:'Playfair Display',serif;font-size:2.5rem;margin-bottom:.5rem}
+header .by{color:#D4A853;font-family:'Noto Sans KR',sans-serif;font-size:.95rem}
+header .desc{margin-top:1rem;color:rgba(255,255,255,.7);font-size:.9rem;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.8}
+.toc{max-width:700px;margin:3rem auto;padding:0 2rem}
+.toc h3{font-family:'Playfair Display',serif;color:#1B2A4A;border-bottom:2px solid #D4A853;padding-bottom:.5rem;margin-bottom:1.25rem}
+.toc ul{list-style:none}
+.toc li a{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;text-decoration:none;color:#2C2C2C;border-bottom:1px solid #E2D9C8;font-size:.92rem;transition:color .15s}
+.toc li a:hover{color:#1B2A4A}
+.toc li a span{color:#D4A853;font-family:'Playfair Display',serif;min-width:28px}
+main{max-width:700px;margin:0 auto;padding:2rem}
+.chapter{background:#FFFEF9;border-radius:2px 8px 8px 2px;box-shadow:-4px 0 16px rgba(0,0,0,.07),4px 4px 20px rgba(0,0,0,.1);padding:3rem 3.5rem;margin-bottom:3rem;position:relative}
+.chapter::before{content:'';position:absolute;left:0;top:0;bottom:0;width:18px;background:linear-gradient(to right,#E0D6C8,#FFFEF9);border-radius:2px 0 0 2px}
+.chapter h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:#1B2A4A;border-bottom:2px solid #D4A853;padding-bottom:.6rem;margin-bottom:1.5rem}
+.chapter .body{line-height:2;font-size:.97rem}
+footer{text-align:center;padding:2rem;color:#5A5A5A;font-size:.8rem;border-top:1px solid #E2D9C8}
+footer a{color:#D4A853;text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+<h1>${escHtml(title)}</h1>
+<div class="by">저자: ${escHtml(author)}</div>
+${state.desc ? `<div class="desc">${escHtml(state.desc)}</div>` : ''}
+</header>
+<div class="toc">
+<h3>목차</h3>
+<ul>${tocHTML}</ul>
+</div>
+<main>${chaptersHTML}</main>
+<footer>BookCraft로 만든 디지털 책 &nbsp;·&nbsp; <a href="https://github.com/">GitHub</a>로 공유</footer>
+</body>
+</html>`;
+
+    download(`${title}.html`, html, 'text/html');
+    showToast('🌐 HTML 파일이 저장되었습니다!');
+  }
+
+  // ── JSON 내보내기/가져오기 ──
+  function exportJSON() {
+    syncCurrentChapter();
+    download('bookcraft_backup.json', JSON.stringify(state, null, 2), 'application/json');
+    showToast('📦 JSON 백업 완료!');
+  }
+
+  function importJSON() {
+    document.getElementById('importInput').click();
+  }
+
+  function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        state = imported;
+        document.getElementById('bookTitle').value = state.title || '';
+        document.getElementById('bookAuthor').value = state.author || '';
+        document.getElementById('bookDesc').value = state.desc || '';
+        state.activeIdx = null;
+        showEditor(false);
+        renderChapterList();
+        updatePreview();
+        showToast('📂 불러오기 완료!');
+      } catch(err) {
+        showToast('❌ JSON 파일을 읽을 수 없습니다');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ── 유틸 ──
+  function download(filename, content, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content], {type}));
+    a.download = filename;
+    a.click();
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── 예시 불러오기 ──
+  function loadDemo() {
+    if (!confirm('현재 작업 중인 내용이 예시 내용으로 교체됩니다. 계속할까요?')) return;
+    state = {
+      title: '별빛 아래에서',
+      author: '김은하',
+      desc: '한 사람이 별을 보며 쓴 이야기들. 잃어버린 것들과 다시 찾은 것들에 대하여.',
+      activeIdx: 0,
+      chapters: [
+        {
+          title: '프롤로그: 첫 번째 별',
+          body: '어릴 때부터 나는 밤하늘을 좋아했다.\n\n도시의 불빛이 모두 꺼지는 새벽 두 시, 나는 옥상에 올라가 담요를 두르고 앉았다. 별들이 하나둘 모습을 드러낼 때마다 마치 오래된 친구를 만나는 것 같았다.\n\n> "별을 보는 것은 과거를 보는 것이다. 빛이 여기까지 오는 데 수백 년이 걸렸으니까."\n> — 할아버지의 말씀\n\n그 말을 이해하게 된 건 훨씬 나중의 일이었다.'
+        },
+        {
+          title: '1장: 길을 잃은 여름',
+          body: '스물여섯의 여름은 유독 길었다.\n\n직장을 그만두고, 연인과 헤어지고, 살던 방마저 비워야 했던 그해 여름. 나는 배낭 하나 메고 기차에 올라탔다. 행선지는 정하지 않았다.\n\n────────────────────\n\n강릉에서 내렸다. 이유는 없었다. 그냥 그 역 이름이 좋았다. 강, 이라는 글자가 물처럼 흘렀다.\n\n📌 [메모: 강릉 해변의 냄새 - 짠 바람과 솔향기가 섞인 것]\n\n민박집 할머니는 아무것도 묻지 않았다. 그냥 방 열쇠를 건네며 말씀하셨다.\n\n"저녁은 여섯 시에 나와요."'
+        },
+        {
+          title: '2장: 별자리를 그리는 법',
+          body: '별자리는 임의적이다.\n\n사람들이 점들 사이를 선으로 연결했을 뿐이다. 오리온은 사냥꾼일 수도 있지만, 다른 문화권에서는 전혀 다른 무언가였다.\n\n그것을 알고 나서 나는 오히려 위로를 받았다. 어떤 연결이든, 당신이 그린 선이 곧 당신만의 별자리가 된다는 것.\n\n인생도 그런 것 아닐까. 의미는 원래 있는 게 아니라, 우리가 그어가는 선들 속에서 생겨나는 것.'
+        }
+      ]
+    };
+    document.getElementById('bookTitle').value = state.title;
+    document.getElementById('bookAuthor').value = state.author;
+    document.getElementById('bookDesc').value = state.desc;
+    renderChapterList();
+    selectChapter(0);
+    updatePreview();
+    showToast('📖 예시 책을 불러왔습니다!');
+  }
+
+  // 모달 외부 클릭 닫기
+  document.getElementById('shareModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // 초기화
+  init();
+</script>
+</body>
+</html>
